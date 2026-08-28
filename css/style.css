@@ -77,8 +77,12 @@
   .capacidade-card h3{ font-size:15px; color:var(--verde-900); margin-bottom:8px; font-weight:500; }
   .capacidade-card p{ font-size:13px; color:var(--tinta-suave); }
 
-  .parceiros-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
-  .parceiro-box{ height:90px; border:1px dashed var(--linha); border-radius:4px; background:var(--papel-alt); display:flex; align-items:center; justify-content:center; text-align:center; padding:8px; font-size:12px; color:var(--tinta-suave); }
+  .apoio-subhead{ font-size:12px; text-transform:uppercase; letter-spacing:0.06em; font-weight:600; color:var(--verde-700); margin-bottom:16px; }
+  .apoio-grid{ display:flex; justify-content:flex-start; align-items:center; margin-bottom:36px; }
+  .apoio-logo{ max-width:180px; max-height:80px; width:auto; height:auto; object-fit:contain; }
+
+  .parceiros-grid{ display:flex; flex-wrap:wrap; justify-content:flex-start; align-items:center; gap:40px; }
+  .parceiro-logo{ max-width:160px; max-height:70px; width:auto; height:auto; object-fit:contain; }
 
   /* ---- TRANSPARENCIA ---- */
   .transp-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
@@ -128,15 +132,17 @@
   footer h5{ font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:var(--verde-700); margin-bottom:12px; }
   footer .flinks{ display:flex; flex-direction:column; gap:8px; font-size:13px; color:var(--tinta-suave); }
   footer .flinks a{ cursor:pointer; }
-  .foot-bottom{ font-size:12px; color:var(--tinta-suave); border-top:1px solid var(--linha); padding-top:18px; }
+  .foot-bottom{ font-size:12px; color:var(--tinta-suave); border-top:1px solid var(--linha); padding-top:18px; text-align:center; }
 
   .page{ display:none; }
   .page.is-active{ display:block; }
 
   @media (max-width:760px){
     .hero-inner, .noticias-grid, .foot-grid, .sobre-grid, .contato-grid{ grid-template-columns:1fr; }
-    .projetos-grid, .transp-grid, .capacidade-grid, .parceiros-grid{ grid-template-columns:1fr 1fr; }
+    .projetos-grid, .transp-grid, .capacidade-grid{ grid-template-columns:1fr 1fr; }
     .navlinks{ display:none; }
     .hero h1{ font-size:30px; }
     .editais-section{ padding:30px 18px; }
+    .apoio-logo, .parceiro-logo{ max-width:120px; max-height:56px; }
+    .parceiros-grid{ gap:24px; }
   }
