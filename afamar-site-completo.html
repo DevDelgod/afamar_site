@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AFAMAR — Redesign completo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<style>
+  :root{
+    --verde-900:#33401f; --verde-700:#43512a; --verde-500:#5f7239; --verde-200:#c9d6b8; --verde-100:#e4ead9;
+    --ocre-600:#b3812c; --ocre-400:#d9a44a; --ocre-100:#f2e1bd;
+    --terra-600:#a8592f; --terra-100:#f1ddcc;
+    --papel:#FFFFFF; --papel-alt:#F8F9FA; --tinta:#212529; --tinta-suave:#495057; --linha:#E9ECEF;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ font-family:'Public Sans', sans-serif; background:var(--papel); color:var(--tinta); line-height:1.6; }
+  h1,h2,h3{ font-family:'Fraunces', serif; font-weight:500; letter-spacing:-0.01em; }
+  a{ color:inherit; text-decoration:none; }
+  .wrap{ max-width:1080px; margin:0 auto; padding:0 32px; }
+
+  header{ position:sticky; top:0; z-index:20; background:var(--papel); border-bottom:1px solid var(--linha); }
+  .nav{ display:flex; align-items:center; justify-content:space-between; padding:18px 32px; max-width:1080px; margin:0 auto; flex-wrap:wrap; gap:12px;}
+  .brand{ display:flex; align-items:center; gap:10px; font-family:'Fraunces', serif; font-size:19px; font-weight:600; color:var(--verde-900); cursor:pointer;}
+  .brand .mark{ width:30px; height:30px; border-radius:50%; background:conic-gradient(from 210deg, var(--verde-500), var(--ocre-400), var(--verde-500)); }
+  .navlinks{ display:flex; gap:24px; font-size:13px; color:var(--tinta-suave); flex-wrap:wrap; }
+  .navlinks a{ cursor:pointer; padding:4px 0; border-bottom:2px solid transparent; }
+  .navlinks a:hover{ color:var(--verde-900); }
+  .navlinks a.active{ color:var(--verde-900); font-weight:600; border-color:var(--ocre-400); }
+
+  section{ padding:56px 0; }
+  .section-head{ display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:30px; gap:20px; flex-wrap:wrap;}
+  .section-head h2{ font-size:26px; color:var(--verde-900); }
+  .section-head p{ font-size:14px; color:var(--tinta-suave); max-width:44ch; }
+  .eyebrow{ font-size:13px; letter-spacing:0.08em; text-transform:uppercase; color:var(--verde-700); font-weight:600; margin-bottom:14px;}
+
+  .btn{ padding:12px 22px; border-radius:3px; font-size:14px; font-weight:600; display:inline-block; cursor:pointer; }
+  .btn-primary{ background:var(--verde-900); color:var(--papel); }
+  .btn-ghost{ border:1px solid var(--verde-700); color:var(--verde-900); }
+
+  /* ---- HOME ---- */
+  .hero{ padding-top:70px; }
+  .hero-inner{ display:grid; grid-template-columns:1.1fr 0.9fr; gap:48px; align-items:center; }
+  .hero h1{ font-size:42px; line-height:1.12; color:var(--verde-900); margin-bottom:18px;}
+  .hero p{ font-size:16px; color:var(--tinta-suave); max-width:46ch; margin-bottom:26px; }
+  .cta-row{ display:flex; gap:12px; }
+  .hero-art{ height:300px; border-radius:4px; background:linear-gradient(180deg, var(--ocre-100), var(--verde-100)); position:relative; overflow:hidden; border:1px solid var(--linha); }
+  .hero-art::before{ content:""; position:absolute; inset:0; background-image: repeating-linear-gradient(90deg, transparent 0 34px, rgba(51,64,31,0.14) 34px 36px); }
+  .hero-stats{ position:absolute; bottom:16px; left:16px; right:16px; display:flex; gap:10px; }
+  .stat{ background:var(--papel); border:1px solid var(--linha); border-radius:3px; padding:10px 14px; font-size:12px; color:var(--tinta-suave); }
+  .stat b{ display:block; font-family:'Fraunces',serif; font-size:19px; color:var(--verde-900); font-weight:600; }
+
+  .projetos-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+  .proj-card{ border-radius:6px; padding:24px; border:1px solid var(--linha); background:var(--papel); }
+  .proj-card.merenda{ border-top:3px solid var(--verde-500); }
+  .proj-card.farinha{ border-top:3px solid var(--ocre-600); }
+  .proj-card.mudas{ border-top:3px solid var(--terra-600); }
+  .proj-tag{ font-size:11px; text-transform:uppercase; letter-spacing:0.06em; font-weight:600; margin-bottom:12px; display:inline-block; padding:3px 9px; border-radius:2px; }
+  .merenda .proj-tag{ background:var(--verde-100); color:var(--verde-700); }
+  .farinha .proj-tag{ background:var(--ocre-100); color:var(--ocre-600); }
+  .mudas .proj-tag{ background:var(--terra-100); color:var(--terra-600); }
+  .proj-card h3{ font-size:18px; margin-bottom:10px; color:var(--verde-900); }
+  .proj-card p{ font-size:13px; color:var(--tinta-suave); margin-bottom:14px; }
+  .proj-link{ font-size:13px; font-weight:600; color:var(--verde-900); border-bottom:1px solid var(--verde-500); padding-bottom:2px; cursor:pointer;}
+
+  .noticias-grid{ display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+  .noticia-card{ border:1px solid var(--linha); border-radius:6px; overflow:hidden; }
+  .noticia-img{ height:150px; background:linear-gradient(135deg,var(--verde-200),var(--ocre-100)); }
+  .noticia-body{ padding:16px 18px; }
+  .noticia-body .date{ font-size:12px; color:var(--tinta-suave); margin-bottom:6px; }
+  .noticia-body h4{ font-family:'Fraunces',serif; font-size:15px; font-weight:500; color:var(--verde-900); margin-bottom:6px;}
+  .noticia-body p{ font-size:13px; color:var(--tinta-suave); }
+
+  /* ---- QUEM SOMOS ---- */
+  .sobre-grid{ display:grid; grid-template-columns:1fr 1fr; gap:44px; align-items:start; }
+  .sobre-grid p{ font-size:14px; color:var(--tinta-suave); margin-bottom:14px; }
+  .timeline{ display:flex; flex-direction:column; gap:0; border-left:2px solid var(--verde-200); padding-left:20px; }
+  .tl-item{ position:relative; padding-bottom:26px; }
+  .tl-item::before{ content:""; position:absolute; left:-25px; top:2px; width:9px; height:9px; border-radius:50%; background:var(--ocre-400); }
+  .tl-item b{ display:block; font-family:'Fraunces',serif; font-size:15px; color:var(--verde-900); margin-bottom:3px; }
+  .tl-item span{ font-size:13px; color:var(--tinta-suave); }
+
+  .capacidade-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:20px; }
+  .capacidade-card{ border:1px solid var(--linha); border-radius:6px; padding:22px; background:var(--papel); }
+  .capacidade-icon{ width:38px; height:38px; border-radius:50%; background:var(--verde-100); color:var(--verde-700); display:flex; align-items:center; justify-content:center; font-family:'Fraunces',serif; font-weight:600; font-size:14px; margin-bottom:14px; }
+  .capacidade-card h3{ font-size:15px; color:var(--verde-900); margin-bottom:8px; font-weight:500; }
+  .capacidade-card p{ font-size:13px; color:var(--tinta-suave); }
+
+  .parceiros-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+  .parceiro-box{ height:90px; border:1px dashed var(--linha); border-radius:4px; background:var(--papel-alt); display:flex; align-items:center; justify-content:center; text-align:center; padding:8px; font-size:12px; color:var(--tinta-suave); }
+
+  /* ---- TRANSPARENCIA ---- */
+  .transp-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .transp-item{ border:1px solid var(--linha); border-radius:4px; padding:18px; font-size:13px; color:var(--tinta-suave); cursor:pointer; }
+  .transp-item:hover{ border-color:var(--verde-500); }
+  .transp-item b{ display:block; color:var(--verde-900); font-size:14px; margin-bottom:4px; font-family:'Fraunces',serif; font-weight:500; }
+
+  .doclist{ display:flex; flex-direction:column; gap:1px; background:var(--linha); border-radius:4px; overflow:hidden; border:1px solid var(--linha);}
+  .doc-row{ display:flex; align-items:center; justify-content:space-between; gap:16px; background:var(--papel); padding:13px 16px; }
+  .doc-row .title{ font-size:14px; }
+  .doc-row .date{ font-size:12px; color:var(--tinta-suave); }
+  .doc-row .dl{ font-size:13px; font-weight:600; color:var(--verde-900); border-bottom:1px solid var(--verde-500); padding-bottom:1px; flex-shrink:0; }
+
+  /* ---- EDITAIS ---- */
+  .editais-section{ background:var(--verde-900); color:var(--papel); border-radius:8px; padding:44px 40px 48px; }
+  .editais-section .section-head h2{ color:var(--papel); }
+  .editais-section .section-head p{ color:var(--verde-200); }
+  .tabs{ display:flex; gap:8px; margin-bottom:26px; flex-wrap:wrap; }
+  .tab{ padding:9px 16px; border-radius:20px; font-size:13px; font-weight:600; border:1px solid rgba(240,238,226,0.28); color:var(--verde-100); cursor:pointer; background:transparent; }
+  .tab.is-active{ background:var(--papel); color:var(--verde-900); border-color:var(--papel); }
+  .tab .dot{ display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:7px; vertical-align:middle; }
+  .tab[data-tab="merenda"] .dot{ background:var(--verde-500); }
+  .tab[data-tab="farinha"] .dot{ background:var(--ocre-400); }
+  .tab[data-tab="geral"] .dot{ background:var(--verde-200); }
+  .edital-list{ display:flex; flex-direction:column; gap:1px; background:rgba(240,238,226,0.14); border-radius:4px; overflow:hidden; }
+  .edital-row{ display:none; background:var(--verde-900); padding:14px 16px; align-items:center; justify-content:space-between; gap:16px; }
+  .edital-row.show{ display:flex; }
+  .edital-left{ display:flex; align-items:center; gap:12px; min-width:0; }
+  .edital-left .num{ font-family:'Fraunces',serif; font-size:13px; color:var(--verde-200); min-width:56px; }
+  .edital-left .title{ font-size:14px; color:var(--papel); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .edital-right{ display:flex; align-items:center; gap:14px; flex-shrink:0; }
+  .badge{ font-size:11px; padding:3px 9px; border-radius:20px; font-weight:600; }
+  .badge.aberto{ background:var(--ocre-400); color:#3a2a05; }
+  .badge.resultado{ background:rgba(240,238,226,0.16); color:var(--verde-200); }
+  .dl-e{ font-size:13px; color:var(--verde-100); border-bottom:1px solid rgba(228,234,217,0.4); padding-bottom:1px; }
+
+  /* ---- CONTATO ---- */
+  .contato-grid{ display:grid; grid-template-columns:1fr 1fr; gap:40px; }
+  .info-row{ display:flex; gap:10px; font-size:14px; color:var(--tinta-suave); margin-bottom:12px; }
+  .info-row b{ color:var(--verde-900); min-width:90px; }
+  .form-field{ margin-bottom:14px; }
+  .form-field label{ font-size:12px; color:var(--tinta-suave); display:block; margin-bottom:5px; }
+  .form-field input, .form-field textarea{ width:100%; padding:10px 12px; border:1px solid var(--linha); border-radius:3px; font-family:'Public Sans',sans-serif; font-size:14px; background:var(--papel); color:var(--tinta); }
+
+  footer{ background:var(--papel-alt); border-top:1px solid var(--linha); padding:40px 0 28px; margin-top:20px; }
+  .foot-grid{ display:grid; grid-template-columns:1.3fr 1fr 1fr; gap:32px; margin-bottom:28px; }
+  footer h5{ font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:var(--verde-700); margin-bottom:12px; }
+  footer .flinks{ display:flex; flex-direction:column; gap:8px; font-size:13px; color:var(--tinta-suave); }
+  footer .flinks a{ cursor:pointer; }
+  .foot-bottom{ font-size:12px; color:var(--tinta-suave); border-top:1px solid var(--linha); padding-top:18px; }
+
+  .page{ display:none; }
+  .page.is-active{ display:block; }
+
+  @media (max-width:760px){
+    .hero-inner, .noticias-grid, .foot-grid, .sobre-grid, .contato-grid{ grid-template-columns:1fr; }
+    .projetos-grid, .transp-grid, .capacidade-grid, .parceiros-grid{ grid-template-columns:1fr 1fr; }
+    .navlinks{ display:none; }
+    .hero h1{ font-size:30px; }
+    .editais-section{ padding:30px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <div class="brand" data-goto="home"><span class="mark"></span>AFAMAR</div>
+    <nav class="navlinks">
+      <a data-goto="home">Início</a>
+      <a data-goto="sobre">Quem somos</a>
+      <a data-goto="projetos">Projetos</a>
+      <a data-goto="transparencia">Transparência</a>
+      <a data-goto="editais">Editais</a>
+      <a data-goto="noticias">Notícias</a>
+      <a data-goto="contato">Contato</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- HOME -->
+  <div class="page is-active" data-page="home">
+    <section class="hero">
+      <div class="hero-inner">
+        <div>
+          <div class="eyebrow">Associação de Agricultura Familiar de Maricá</div>
+          <h1>Da terra de Maricá para a mesa de quem precisa</h1>
+          <p>Desde 2017, unimos pequenos produtores em torno de frentes de trabalho: alimentação escolar saudável, distribuição de mudas e transformação do excedente da lavoura em produtos de valor.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" data-goto="editais">Ver editais</a>
+            <a class="btn btn-ghost" data-goto="projetos">Conhecer os projetos</a>
+          </div>
+        </div>
+        <div class="hero-art">
+          <div class="hero-stats">
+            <div class="stat"><b>18</b>escolas atendidas</div>
+            <div class="stat"><b>20 mil</b>mudas distribuídas</div>
+            <div class="stat"><b>2ha</b>de cana plantada</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <div><h2>Nossas frentes de trabalho</h2><p>Cada projeto tem editais, prestação de contas e resultados próprios.</p></div>
+      </div>
+      <div class="projetos-grid">
+        <div class="proj-card merenda">
+          <span class="proj-tag">Alimentação escolar</span>
+          <h3>Merenda Saudável</h3>
+          <p>Leva produtos da agricultura familiar para 18 escolas públicas de Maricá.</p>
+          <a class="proj-link" data-goto="editais">Editais deste projeto →</a>
+        </div>
+        <div class="proj-card farinha">
+          <span class="proj-tag">Beneficiamento</span>
+          <h3>Fábrica de Farinha Móvel</h3>
+          <p>Transforma o aipim excedente em farinha de mesa, com maquinário itinerante.</p>
+          <a class="proj-link" data-goto="editais">Editais deste projeto →</a>
+        </div>
+        <div class="proj-card mudas">
+          <span class="proj-tag">Distribuição</span>
+          <h3>Doação de Mudas</h3>
+          <p>Distribui mudas de hortaliças, leguminosas e tubérculos à comunidade e escolas.</p>
+          <a class="proj-link" data-goto="projetos">Saiba mais →</a>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <div><h2>Notícias</h2><p>O que está acontecendo na lavoura e nas escolas.</p></div>
+      </div>
+      <div class="noticias-grid">
+        <div class="noticia-card">
+          <div class="noticia-img"></div>
+          <div class="noticia-body">
+            <div class="date">12 ago 2026</div>
+            <h4>Visita da Secretaria de Agricultura à associação</h4>
+            <p>Representantes conheceram de perto a produção de aipim e banana em Maricá.</p>
+          </div>
+        </div>
+        <div class="noticia-card">
+          <div class="noticia-img"></div>
+          <div class="noticia-body">
+            <div class="date">03 ago 2026</div>
+            <h4>Escola Jacintho Luiz Caetano recebe mandiocas</h4>
+            <p>Colheita de mais de cem pés de mandioca foi doada para a merenda escolar.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- QUEM SOMOS -->
+  <div class="page" data-page="sobre">
+    <section style="padding-top:44px;">
+      <div class="eyebrow">Institucional</div>
+      <h2 style="font-size:30px; color:var(--verde-900); margin-bottom:30px;">Quem somos</h2>
+      <div class="sobre-grid">
+        <div>
+          <p>Em 2017, pequenos produtores familiares de Maricá se uniram e deram início ao que se tornaria a Associação de Agricultura Familiar de Maricá, inspirada no professor Luiz Carlos Viegas, referência local em agricultura e desenvolvimento social.</p>
+          <p>A formalização veio dois anos depois, em 2019. Desde então, a Associação testou diferentes espécies e técnicas de plantio — banana, aipim, maracujá, cana-de-açúcar e abóbora — até consolidar 2 hectares de cana-de-açúcar plantados.</p>
+          <p>Em paralelo, o projeto de distribuição de mudas já somou cerca de 20 mil unidades de hortaliças, leguminosas e tubérculos, entregues principalmente à E.M. Jacintho Caetano e à população local. Em 2022, diante da baixa produtividade do aipim branco típico da região, a Associação buscou apoio da Embrapa para melhorar a espécie, hoje adaptada e mais produtiva.</p>
+        </div>
+        <div class="timeline">
+          <div class="tl-item"><b>2017</b><span>Produtores familiares se organizam em Maricá</span></div>
+          <div class="tl-item"><b>2019</b><span>Formalização da AFAMAR</span></div>
+          <div class="tl-item"><b>2020</b><span>Testes de plantio com novas espécies e técnicas</span></div>
+          <div class="tl-item"><b>2022</b><span>Parceria com a Embrapa para melhoramento do aipim</span></div>
+          <div class="tl-item"><b>Hoje</b><span>2ha de cana-de-açúcar e ~20 mil mudas distribuídas</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <div><h2>Capacidade técnica</h2><p>Estrutura física, equipamentos e equipe que sustentam as frentes de trabalho da Associação.</p></div>
+      </div>
+      <div class="capacidade-grid">
+        <div class="capacidade-card">
+          <div class="capacidade-icon">ES</div>
+          <h3>Estrutura física</h3>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sede administrativa e galpão de beneficiamento com área coberta destinada às atividades da Associação.</p>
+        </div>
+        <div class="capacidade-card">
+          <div class="capacidade-icon">EQ</div>
+          <h3>Equipamentos</h3>
+          <p>Maquinário itinerante de processamento, veículo de transporte e ferramentas de manejo utilizados nos projetos. Texto de exemplo a ser substituído.</p>
+        </div>
+        <div class="capacidade-card">
+          <div class="capacidade-icon">EQ</div>
+          <h3>Equipe</h3>
+          <p>Equipe técnica e administrativa responsável pela coordenação dos projetos, composta por profissionais e produtores associados. Conteúdo ilustrativo.</p>
+        </div>
+        <div class="capacidade-card">
+          <div class="capacidade-icon">AP</div>
+          <h3>Área produtiva</h3>
+          <p>Hectares cultivados e viveiro de mudas utilizados nas frentes de trabalho da Associação. Substituir por dados reais quando disponíveis.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <div><h2>Apoio e Parceiros</h2><p>Instituições que colaboram com as frentes de trabalho da Associação.</p></div>
+      </div>
+      <div class="parceiros-grid">
+        <div class="parceiro-box">Logo parceiro 1</div>
+        <div class="parceiro-box">Logo parceiro 2</div>
+        <div class="parceiro-box">Logo parceiro 3</div>
+        <div class="parceiro-box">Logo parceiro 4</div>
+        <div class="parceiro-box">Logo parceiro 5</div>
+        <div class="parceiro-box">Logo parceiro 6</div>
+        <div class="parceiro-box">Logo parceiro 7</div>
+        <div class="parceiro-box">Logo parceiro 8</div>
+      </div>
+    </section>
+  </div>
+
+  <!-- PROJETOS -->
+  <div class="page" data-page="projetos">
+    <section style="padding-top:44px;">
+      <div class="eyebrow">Institucional</div>
+      <h2 style="font-size:30px; color:var(--verde-900); margin-bottom:30px;">Projetos</h2>
+      <div class="projetos-grid" style="margin-bottom:0;">
+        <div class="proj-card merenda">
+          <span class="proj-tag">Alimentação escolar</span>
+          <h3>Merenda Saudável</h3>
+          <p>Promove a alimentação saudável de 18 escolas públicas com produtos da agricultura familiar em Maricá/RJ, além de fortalecer a estrutura produtiva da região.</p>
+          <a class="proj-link" data-goto="editais">Ver editais →</a>
+        </div>
+        <div class="proj-card farinha">
+          <span class="proj-tag">Beneficiamento</span>
+          <h3>Fábrica de Farinha Móvel</h3>
+          <p>Transforma o aipim excedente do Merenda Saudável em farinha de mandioca de mesa, democratizando o acesso de outros agricultores a maquinário e tecnologia.</p>
+          <a class="proj-link" data-goto="editais">Ver editais →</a>
+        </div>
+        <div class="proj-card mudas">
+          <span class="proj-tag">Distribuição</span>
+          <h3>Doação de Mudas</h3>
+          <p>Fortalece o cultivo e consumo da mandioca na rede pública municipal, a partir da doação de mudas e de mandiocas colhidas pela Associação.</p>
+          <a class="proj-link" data-goto="editais">Ver editais →</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- TRANSPARENCIA -->
+  <div class="page" data-page="transparencia">
+    <section style="padding-top:44px;">
+      <div class="eyebrow">Transparência</div>
+      <h2 style="font-size:30px; color:var(--verde-900); margin-bottom:10px;">Documentos institucionais</h2>
+      <p style="font-size:14px; color:var(--tinta-suave); max-width:56ch; margin-bottom:30px;">Todas as categorias usam o mesmo modelo de lista de documentos — abaixo, um exemplo com Balancetes Financeiros.</p>
+      <div class="transp-grid" style="margin-bottom:40px;">
+        <div class="transp-item" data-categoria="termo-fomento"><b>Termo de fomento</b>Acordos com o poder público</div>
+        <div class="transp-item" data-categoria="atas-estatuto"><b>Atas e estatuto</b>Registros das assembleias</div>
+        <div class="transp-item" data-categoria="calendario"><b>Calendário</b>Agenda institucional</div>
+        <div class="transp-item" data-categoria="cnds"><b>CNDs</b>Certidões negativas de débito</div>
+        <div class="transp-item" data-categoria="competencias-estatutarias"><b>Competências estatutárias</b>Atribuições da diretoria</div>
+        <div class="transp-item" data-categoria="acordos-cooperacao"><b>Acordos de cooperação</b>Parcerias formalizadas</div>
+        <div class="transp-item" data-categoria="organograma"><b>Organograma</b>Estrutura da diretoria</div>
+        <div class="transp-item" data-categoria="editais-institucionais"><b>Editais institucionais</b>Seleções, resultados e chamamentos</div>
+        <div class="transp-item" data-categoria="licitacoes"><b>Licitações</b>Processos licitatórios</div>
+        <div class="transp-item" data-categoria="conselho-fiscal"><b>Conselho fiscal</b>Composição e pareceres</div>
+        <div class="transp-item" data-categoria="relatorio-gestao-anual"><b>Relatório de gestão anual</b>Prestação de contas</div>
+        <div class="transp-item" data-categoria="rh-valores-pagos"><b>RH — valores pagos (CLT)</b>Folha de pagamento dos projetos</div>
+      </div>
+      <h3 style="font-size:17px; color:var(--verde-900); margin-bottom:14px;">Balancetes financeiros</h3>
+      <div class="doclist">
+        <div class="doc-row"><span class="title">Balancete — julho 2026</span><span class="date">01 ago 2026</span><span class="dl">PDF ↓</span></div>
+        <div class="doc-row"><span class="title">Balancete — junho 2026</span><span class="date">01 jul 2026</span><span class="dl">PDF ↓</span></div>
+        <div class="doc-row"><span class="title">Balancete — maio 2026</span><span class="date">01 jun 2026</span><span class="dl">PDF ↓</span></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- LISTA DE DOCUMENTOS (modelo dinâmico por categoria) -->
+  <div class="page" data-page="lista-documentos">
+    <section style="padding-top:44px;">
+      <a class="proj-link" data-goto="transparencia" style="display:inline-block; margin-bottom:24px;">← Voltar para Transparência</a>
+      <h2 id="titulo-categoria-doc" style="font-size:30px; color:var(--verde-900); margin-bottom:30px;">Categoria</h2>
+      <div class="doclist" id="lista-documentos-doclist"></div>
+      <p id="lista-documentos-vazio" style="display:none; font-size:13px; color:var(--tinta-suave); padding:18px 2px;">Nenhum documento cadastrado nesta categoria ainda.</p>
+    </section>
+  </div>
+
+  <!-- EDITAIS -->
+  <div class="page" data-page="editais">
+    <section style="padding-top:44px;">
+      <div class="editais-section">
+        <div class="section-head">
+          <div><h2>Editais institucionais</h2><p>Filtre por projeto para encontrar o edital certo — sem rolar por uma lista única.</p></div>
+        </div>
+        <div class="tabs">
+          <button class="tab is-active" data-tab="todos">Todos</button>
+          <button class="tab" data-tab="merenda"><span class="dot"></span>Merenda Saudável</button>
+          <button class="tab" data-tab="farinha"><span class="dot"></span>Fábrica de Farinha Móvel</button>
+          <button class="tab" data-tab="geral"><span class="dot"></span>Institucionais gerais</button>
+        </div>
+        <div class="edital-list" id="editalList">
+          <div class="edital-row show" data-proj="merenda"><div class="edital-left"><span class="num">01/2026</span><span class="title">Edital de Seleção — fornecedores da merenda</span></div><div class="edital-right"><span class="badge aberto">Aberto</span><a class="dl-e" href="#">PDF ↓</a></div></div>
+          <div class="edital-row show" data-proj="farinha"><div class="edital-left"><span class="num">02/2026</span><span class="title">Edital de Aquisição — insumos da farinheira</span></div><div class="edital-right"><span class="badge resultado">Resultado</span><a class="dl-e" href="#">PDF ↓</a></div></div>
+          <div class="edital-row show" data-proj="geral"><div class="edital-left"><span class="num">03/2026</span><span class="title">Edital de Chamamento Público</span></div><div class="edital-right"><span class="badge aberto">Aberto</span><a class="dl-e" href="#">PDF ↓</a></div></div>
+          <div class="edital-row show" data-proj="merenda"><div class="edital-left"><span class="num">04/2026</span><span class="title">Resultado do Edital de Seleção nº 04</span></div><div class="edital-right"><span class="badge resultado">Resultado</span><a class="dl-e" href="#">PDF ↓</a></div></div>
+          <div class="edital-row show" data-proj="farinha"><div class="edital-left"><span class="num">05/2026</span><span class="title">Termo de Prorrogação do Edital nº 05</span></div><div class="edital-right"><span class="badge resultado">Resultado</span><a class="dl-e" href="#">PDF ↓</a></div></div>
+        </div>
+        <div class="edital-empty" id="editalEmpty" style="display:none; padding:26px 16px; font-size:13px; color:var(--verde-200); text-align:center;">Nenhum edital nesta categoria ainda.</div>
+      </div>
+    </section>
+  </div>
+
+  <!-- NOTICIAS -->
+  <div class="page" data-page="noticias">
+    <section style="padding-top:44px;">
+      <div class="eyebrow">Comunicação</div>
+      <h2 style="font-size:30px; color:var(--verde-900); margin-bottom:30px;">Notícias</h2>
+      <div class="noticias-grid">
+        <div class="noticia-card">
+          <div class="noticia-img"></div>
+          <div class="noticia-body"><div class="date">12 ago 2026</div><h4>Visita da Secretaria de Agricultura à associação</h4><p>Representantes conheceram de perto a produção de aipim e banana em Maricá.</p></div>
+        </div>
+        <div class="noticia-card">
+          <div class="noticia-img"></div>
+          <div class="noticia-body"><div class="date">03 ago 2026</div><h4>Escola Jacintho Luiz Caetano recebe mandiocas</h4><p>Colheita de mais de cem pés de mandioca foi doada para a merenda escolar.</p></div>
+        </div>
+        <div class="noticia-card">
+          <div class="noticia-img"></div>
+          <div class="noticia-body"><div class="date">22 jul 2026</div><h4>Parceria com a Embrapa avança no melhoramento do aipim</h4><p>Novas variedades se adaptam ao solo local com maior produtividade.</p></div>
+        </div>
+        <div class="noticia-card">
+          <div class="noticia-img"></div>
+          <div class="noticia-body"><div class="date">08 jul 2026</div><h4>Distribuição de mudas passa de 20 mil unidades</h4><p>Ação segue fortalecendo a agricultura familiar na região.</p></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- CONTATO -->
+  <div class="page" data-page="contato">
+    <section style="padding-top:44px;">
+      <div class="eyebrow">Fale com a gente</div>
+      <h2 style="font-size:30px; color:var(--verde-900); margin-bottom:30px;">Contato</h2>
+      <div class="contato-grid">
+        <div>
+          <div class="info-row"><b>Associação</b><span>Associação de Agricultura Familiar de Maricá</span></div>
+          <div class="info-row"><b>CNPJ</b><span>38.541.418/0001-89</span></div>
+          <div class="info-row"><b>Endereço</b><span>Av. Pref. Ivan Mundin, nº 996, Qd 07, Lt 18 – Araçatiba – Maricá/RJ, CEP 24.901-435</span></div>
+          <div class="info-row"><b>Telefone</b><span>(21) 99594-9566</span></div>
+          <div class="info-row"><b>E-mail</b><span>afamar2@gmail.com</span></div>
+        </div>
+        <div>
+          <div class="form-field"><label>Nome</label><input type="text" placeholder="Seu nome"></div>
+          <div class="form-field"><label>E-mail</label><input type="email" placeholder="seu@email.com"></div>
+          <div class="form-field"><label>Mensagem</label><textarea rows="4" placeholder="Como podemos ajudar?"></textarea></div>
+          <a class="btn btn-primary">Enviar</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <h5>AFAMAR</h5>
+        <p style="font-size:13px; color:var(--tinta-suave); max-width:32ch;">Associação de Agricultura Familiar de Maricá. Av. Pref. Ivan Mundin, nº 996, Araçatiba — Maricá/RJ.</p>
+      </div>
+      <div>
+        <h5>Institucional</h5>
+        <div class="flinks"><a data-goto="sobre">Quem somos</a><a data-goto="projetos">Projetos</a></div>
+      </div>
+      <div>
+        <h5>Transparência</h5>
+        <div class="flinks"><a data-goto="editais">Editais</a><a data-goto="transparencia">Documentos</a></div>
+      </div>
+    </div>
+    <div class="foot-bottom">© 2026 Associação de Agricultura Familiar de Maricá — Todos os direitos reservados.</div>
+  </div>
+</footer>
+
+<script>
+  function goto(pageName){
+    document.querySelectorAll('.page').forEach(function(p){ p.classList.toggle('is-active', p.getAttribute('data-page') === pageName); });
+    document.querySelectorAll('.navlinks a').forEach(function(a){ a.classList.toggle('active', a.getAttribute('data-goto') === pageName); });
+    window.scrollTo({top:0, behavior:'instant'});
+  }
+  document.querySelectorAll('[data-goto]').forEach(function(el){
+    el.addEventListener('click', function(){ goto(el.getAttribute('data-goto')); });
+  });
+  goto('home');
+
+  var firebaseConfig = {
+    apiKey: "AIzaSyAER-QCFqDV4G2v0nT72lW1JI_BHFFlD9Y",
+    authDomain: "afamar-99547.firebaseapp.com",
+    projectId: "afamar-99547",
+    storageBucket: "afamar-99547.firebasestorage.app",
+    messagingSenderId: "1089218253638",
+    appId: "1:1089218253638:web:75a13b538bc0c4bc7a8b47",
+    measurementId: "G-TTT47R9QJ2"
+  };
+  firebase.initializeApp(firebaseConfig);
+  var db = firebase.firestore();
+
+  // O card único "Editais institucionais" da Transparência agrega as 3 categorias
+  // de edital usadas no admin e na página de Editais (merenda/farinha/geral).
+  // Toda outra categoria usa o mesmo slug no admin, na Transparência e no Firestore.
+  var categoriaParaFirestore = {
+    'editais-institucionais': ['merenda', 'farinha', 'geral']
+  };
+
+  function formatarData(timestamp){
+    if(!timestamp || !timestamp.toDate) return '';
+    var d = timestamp.toDate();
+    var meses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+    var dia = String(d.getDate()).padStart(2, '0');
+    return dia + ' ' + meses[d.getMonth()] + ' ' + d.getFullYear();
+  }
+
+  var docsPorCategoria = {};
+  var documentosProntos = db.collection('documentos').orderBy('data', 'desc').get()
+    .then(function(snapshot){
+      snapshot.forEach(function(doc){
+        var d = doc.data();
+        var lista = docsPorCategoria[d.categoria] || (docsPorCategoria[d.categoria] = []);
+        lista.push(d);
+      });
+    })
+    .catch(function(err){
+      console.error('Erro ao carregar documentos do Firestore:', err);
+    });
+
+  function renderizarDocumentos(categoriaSlug){
+    var container = document.getElementById('lista-documentos-doclist');
+    var vazio = document.getElementById('lista-documentos-vazio');
+    container.innerHTML = '<div class="doc-row"><span class="title">Carregando documentos…</span></div>';
+    vazio.style.display = 'none';
+
+    documentosProntos.then(function(){
+      var categoriasFirestore = categoriaParaFirestore[categoriaSlug] || [categoriaSlug];
+      var docs = [];
+      categoriasFirestore.forEach(function(cat){
+        docs = docs.concat(docsPorCategoria[cat] || []);
+      });
+      docs.sort(function(a, b){
+        var ta = a.data && a.data.toMillis ? a.data.toMillis() : 0;
+        var tb = b.data && b.data.toMillis ? b.data.toMillis() : 0;
+        return tb - ta;
+      });
+
+      if(docs.length === 0){
+        container.innerHTML = '';
+        vazio.style.display = 'block';
+        return;
+      }
+
+      container.innerHTML = docs.map(function(doc){
+        var titulo = (doc.titulo || 'Documento').replace(/</g, '&lt;');
+        var data = formatarData(doc.data);
+        var url = doc.url || '#';
+        return '<div class="doc-row"><span class="title">' + titulo + '</span><span class="date">' + data + '</span><a class="dl" href="' + url + '" target="_blank" rel="noopener">PDF ↓</a></div>';
+      }).join('');
+    });
+  }
+
+  document.querySelectorAll('.transp-item[data-categoria]').forEach(function(item){
+    item.addEventListener('click', function(){
+      var nomeEl = item.querySelector('b');
+      var categoriaSlug = item.getAttribute('data-categoria');
+      var nome = nomeEl ? nomeEl.textContent : categoriaSlug;
+      document.getElementById('titulo-categoria-doc').textContent = nome;
+      goto('lista-documentos');
+      renderizarDocumentos(categoriaSlug);
+    });
+  });
+
+  var tabs = document.querySelectorAll('.tab');
+  var editalList = document.getElementById('editalList');
+  var empty = document.getElementById('editalEmpty');
+
+  function filtroEditalAtivo(){
+    var ativa = document.querySelector('.tab.is-active');
+    return ativa ? ativa.getAttribute('data-tab') : 'todos';
+  }
+
+  function aplicarFiltroEditais(){
+    var filter = filtroEditalAtivo();
+    var visibleCount = 0;
+    document.querySelectorAll('.edital-row').forEach(function(row){
+      var match = filter === 'todos' || row.getAttribute('data-proj') === filter;
+      row.classList.toggle('show', match);
+      if(match) visibleCount++;
+    });
+    empty.style.display = visibleCount === 0 ? 'block' : 'none';
+  }
+
+  tabs.forEach(function(tab){
+    tab.addEventListener('click', function(){
+      tabs.forEach(function(t){ t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      aplicarFiltroEditais();
+    });
+  });
+
+  // Injeta na lista de Editais os documentos reais enviados pelo admin,
+  // usando a mesma categoria (merenda/farinha/geral) como data-proj para
+  // que o filtro por abas já existente funcione sem mudanças.
+  documentosProntos.then(function(){
+    var projetos = ['merenda', 'farinha', 'geral'];
+    var htmlDocsReais = '';
+    projetos.forEach(function(proj){
+      (docsPorCategoria[proj] || []).forEach(function(doc){
+        var titulo = (doc.titulo || 'Documento').replace(/</g, '&lt;');
+        var data = formatarData(doc.data);
+        var url = doc.url || '#';
+        htmlDocsReais += '<div class="edital-row show" data-proj="' + proj + '">' +
+          '<div class="edital-left"><span class="num">' + data + '</span><span class="title">' + titulo + '</span></div>' +
+          '<div class="edital-right"><a class="dl-e" href="' + url + '" target="_blank" rel="noopener">PDF ↓</a></div>' +
+          '</div>';
+      });
+    });
+    if(htmlDocsReais){
+      editalList.insertAdjacentHTML('afterbegin', htmlDocsReais);
+    }
+    aplicarFiltroEditais();
+  });
+</script>
+
+</body>
+</html>
