@@ -1,0 +1,21 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "static-site",
+      "runtimeExecutable": "powershell.exe",
+      "runtimeArgs": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "C:\\Users\\incub\\AppData\\Local\\Temp\\claude\\C--Users-incub-OneDrive-Documentos-afamar-site\\dbb08d91-b92e-41ef-bfe5-1b7ab7a48eda\\scratchpad\\static-server.ps1",
+        "-Port",
+        "8080",
+        "-Root",
+        "C:\\Users\\incub\\OneDrive\\Documentos\\afamar_site"
+      ],
+      "port": 8080
+    }
+  ]
+}
