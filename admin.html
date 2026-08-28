@@ -319,6 +319,7 @@
           titulo: titulo,
           categoria: categoria,
           url: data.secure_url,
+          publicId: data.public_id,
           data: firebase.firestore.FieldValue.serverTimestamp()
         });
       })
@@ -433,15 +434,31 @@
     var ok = confirm('Excluir "' + (dados.titulo || 'este documento') + '"? Essa ação não pode ser desfeita — o documento some imediatamente da página pública.');
     if(!ok) return;
 
+    // A exclusão real de um arquivo no Cloudinary (endpoint /destroy) sempre exige
+    // autenticação assinada com a API secret da conta — não existe uma rota unsigned
+    // para apagar um recurso já publicado (o "delete_token" do Cloudinary só vale por
+    // 10 minutos após o upload, então não serve aqui). Colocar a secret neste painel
+    // estático exporia o controle total da conta a qualquer visitante, então essa
+    // chamada não é feita. Em vez disso, guardamos o public_id numa fila de limpeza
+    // para remoção manual (Media Library) ou, futuramente, uma Cloud Function que
+    // guarde a secret no servidor e processe essa fila com segurança.
     db.collection('documentos').doc(id).delete()
       .then(function(){
-        // A página pública só consulta o Firestore, então excluir o registro
-        // aqui já remove o documento do site na hora. O PDF em si continua
-        // hospedado no Cloudinary: removê-lo de lá exige uma chamada assinada
-        // com a API secret da conta, que não pode ficar exposta neste painel
-        // estático — faça essa limpeza pela Media Library do Cloudinary quando
-        // quiser (ou automatize depois com uma Cloud Function).
-        alert('Documento excluído com sucesso.');
+        if(dados.publicId){
+          return db.collection('cloudinary_pendente_exclusao').add({
+            publicId: dados.publicId,
+            titulo: dados.titulo || '',
+            url: dados.url || '',
+            excluidoEm: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        }
+      })
+      .then(function(){
+        if(dados.publicId){
+          alert('Documento removido do site.\n\nO arquivo ainda ocupa espaço no Cloudinary — o ID "' + dados.publicId + '" foi salvo na coleção "cloudinary_pendente_exclusao" do Firestore para você remover pela Media Library do Cloudinary (ou automatizar a limpeza depois).');
+        } else {
+          alert('Documento removido do site.\n\nEste registro não tinha um public_id salvo (foi enviado antes desta atualização), então não é possível rastrear o arquivo correspondente no Cloudinary automaticamente.');
+        }
         carregarDocumentosDaCategoria(gerenciarCategoria.value);
       })
       .catch(function(err){
@@ -501,6 +518,7 @@
             throw new Error(data.error ? data.error.message : 'Falha no upload do novo PDF.');
           }
           atualizacao.url = data.secure_url;
+          atualizacao.publicId = data.public_id;
         });
     } else {
       preparo = Promise.resolve();
