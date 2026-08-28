@@ -56,11 +56,27 @@
 
   .noticias-grid{ display:grid; grid-template-columns:1fr 1fr; gap:22px; }
   .noticia-card{ border:1px solid var(--linha); border-radius:6px; overflow:hidden; }
-  .noticia-img{ height:150px; background:linear-gradient(135deg,var(--verde-200),var(--ocre-100)); }
   .noticia-body{ padding:16px 18px; }
   .noticia-body .date{ font-size:12px; color:var(--tinta-suave); margin-bottom:6px; }
   .noticia-body h4{ font-family:'Fraunces',serif; font-size:15px; font-weight:500; color:var(--verde-900); margin-bottom:6px;}
   .noticia-body p{ font-size:13px; color:var(--tinta-suave); }
+
+  /* ---- CARROSSEL DE IMAGENS DA NOTÍCIA ---- */
+  .noticia-carousel{ position:relative; height:170px; overflow:hidden; background:linear-gradient(135deg,var(--verde-200),var(--ocre-100)); }
+  .noticia-slide{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity 0.4s ease; }
+  .noticia-slide.is-active{ opacity:1; }
+  .car-arrow{
+    position:absolute; top:50%; transform:translateY(-50%); z-index:2;
+    width:28px; height:28px; border-radius:50%; border:none; cursor:pointer;
+    background:rgba(33,37,41,0.45); color:#fff; font-size:16px; line-height:1;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .car-arrow:hover{ background:rgba(33,37,41,0.7); }
+  .car-arrow.prev{ left:8px; }
+  .car-arrow.next{ right:8px; }
+  .car-dots{ position:absolute; bottom:8px; left:0; right:0; z-index:2; display:flex; justify-content:center; gap:6px; }
+  .car-dot{ width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,0.55); cursor:pointer; }
+  .car-dot.is-active{ background:#fff; }
 
   /* ---- QUEM SOMOS ---- */
   .sobre-grid{ display:grid; grid-template-columns:1fr 1fr; gap:44px; align-items:start; }
