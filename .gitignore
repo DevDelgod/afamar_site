@@ -52,3 +52,7 @@ temp/
 .vercel/
 .firebase/
 firebase-debug.log
+
+# Tal do Claudio
+.claude/
+
