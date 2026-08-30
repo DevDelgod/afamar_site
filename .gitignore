@@ -4,14 +4,31 @@ package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
+# Python (usado pelo servidor de desenvolvimento local, python -m http.server)
+__pycache__/
+*.pyc
+
 # Variáveis de ambiente e segredos
 .env
 .env.*
 !.env.example
 *.pem
 *.key
+*.p12
+*.pfx
+*.crt
 credentials.json
 secrets.json
+
+# Credenciais do Firebase Admin SDK — diferente do js/firebase-config.js
+# (chave pública do SDK Web, feita para ir ao navegador), este é o arquivo
+# de conta de serviço com acesso total ao projeto. Se algum dia for preciso
+# rodar um script server-side (Cloud Function, importação em massa etc.),
+# ele deve carregar isso de uma variável de ambiente — nunca de um arquivo
+# commitado aqui.
+serviceAccountKey.json
+service-account*.json
+*firebase-adminsdk*.json
 
 # Build / output
 dist/

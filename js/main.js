@@ -176,9 +176,9 @@ function renderizarDocumentos(categoriaSlug){
     }
 
     container.innerHTML = docs.map(function(doc){
-      var titulo = (doc.titulo || 'Documento').replace(/</g, '&lt;');
+      var titulo = escaparHtml(doc.titulo || 'Documento');
       var data = formatarData(doc.data);
-      var url = doc.url || '#';
+      var url = escaparHtml(doc.url || '#');
       return '<div class="doc-row"><span class="title">' + titulo + '</span><span class="date">' + data + '</span><a class="dl" href="' + url + '" target="_blank" rel="noopener">PDF ↓</a></div>';
     }).join('');
     revelarConteudoDinamico();
@@ -306,9 +306,9 @@ documentosProntos.then(function(){
   var htmlDocsReais = '';
   projetos.forEach(function(proj){
     (docsPorCategoria[proj] || []).forEach(function(doc){
-      var titulo = (doc.titulo || 'Documento').replace(/</g, '&lt;');
+      var titulo = escaparHtml(doc.titulo || 'Documento');
       var data = formatarData(doc.data);
-      var url = doc.url || '#';
+      var url = escaparHtml(doc.url || '#');
       htmlDocsReais += '<div class="edital-row show" data-proj="' + proj + '">' +
         '<div class="edital-left"><span class="num">' + data + '</span><span class="title">' + titulo + '</span></div>' +
         '<div class="edital-right">' + montarTagStatusEdital(doc.status) + '<a class="dl-e" href="' + url + '" target="_blank" rel="noopener">PDF ↓</a></div>' +
@@ -352,9 +352,9 @@ if(balancetesDoclist){
       }
       balancetesDoclist.innerHTML = snapshot.docs.map(function(doc){
         var d = doc.data();
-        var titulo = (d.titulo || 'Balancete').replace(/</g, '&lt;');
+        var titulo = escaparHtml(d.titulo || 'Balancete');
         var referencia = formatarReferenciaBalancete(d.referencia);
-        var url = d.url || '#';
+        var url = escaparHtml(d.url || '#');
         return '<div class="doc-row"><span class="title">' + titulo + '</span>' +
           '<div class="edital-right"><span class="date">' + referencia + '</span>' +
           montarTagStatusBalancete(d.status) +
