@@ -8,6 +8,127 @@ document.querySelectorAll('[data-goto]').forEach(function(el){
 });
 goto('home');
 
+// ---- Header: reduz e ganha sombra ao rolar a página ----
+var headerEl = document.querySelector('header');
+function atualizarHeaderScroll(){
+  headerEl.classList.toggle('header-scrolled', window.scrollY > 50);
+}
+window.addEventListener('scroll', atualizarHeaderScroll);
+atualizarHeaderScroll();
+
+// ---- Animação de entrada da hero (home) ----
+var textoHero = document.querySelector('.hero-inner > div:first-child');
+var fotoHero = document.querySelector('.hero-art');
+var statsHero = document.querySelectorAll('.hero-stats .stat');
+
+if(textoHero) textoHero.classList.add('fade-in-left');
+if(fotoHero) fotoHero.classList.add('fade-in-right');
+statsHero.forEach(function(stat, i){
+  stat.classList.add('fade-in-up');
+  stat.style.animationDelay = (0.4 + i * 0.15) + 's';
+});
+
+// ---- Revelação ao rolar (IntersectionObserver) ----
+// Elementos ganham a classe "hidden-scroll" (estado inicial, via JS) e, ao
+// entrar no viewport, recebem "show-scroll" para disparar a transição do CSS.
+var scrollRevealObserver = new IntersectionObserver(function(entries){
+  entries.forEach(function(entry){
+    if(entry.isIntersecting){
+      entry.target.classList.add('show-scroll');
+      scrollRevealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold:0.15 });
+
+function observarRevelacao(seletor, opcoes){
+  opcoes = opcoes || {};
+  var passo = opcoes.staggerStep || 0.08;
+  document.querySelectorAll(seletor + ':not(.hidden-scroll)').forEach(function(el){
+    el.classList.add('hidden-scroll');
+    if(opcoes.stagger){
+      var indice = Array.prototype.indexOf.call(el.parentElement.children, el);
+      el.style.transitionDelay = (indice * passo) + 's';
+    }
+    scrollRevealObserver.observe(el);
+  });
+}
+
+// Chamada de novo sempre que conteúdo novo entra no DOM (editais e
+// documentos vindos do Firestore), para que também sejam observados.
+function revelarConteudoDinamico(){
+  observarRevelacao('.proj-card', { stagger:true });
+  observarRevelacao('.capacidade-card', { stagger:true });
+  observarRevelacao('.transp-item', { stagger:true });
+  observarRevelacao('.edital-row', { stagger:true, staggerStep:0.06 });
+  observarRevelacao('.doc-row', { stagger:true, staggerStep:0.06 });
+}
+revelarConteudoDinamico();
+
+// ---- Timeline orgânica: a linha se desenha sozinha (tempo fixo) ao entrar na tela ----
+document.querySelectorAll('.timeline .tl-item').forEach(function(item){
+  item.classList.add('hidden-scroll');
+});
+
+// getTotalLength() funciona mesmo com a página ainda escondida (display:none),
+// então já preparamos os dois traçados (desktop/mobile) no carregamento.
+document.querySelectorAll('.timeline .tl-path').forEach(function(path){
+  var comprimento = path.getTotalLength();
+  path.style.strokeDasharray = comprimento;
+  path.style.strokeDashoffset = comprimento;
+  path.style.setProperty('--tl-len', comprimento);
+});
+
+var timelineEl = document.querySelector('.timeline');
+var timelineObserver = null;
+
+function tlPathAtivo(){
+  var path = null;
+  timelineEl.querySelectorAll('.tl-path').forEach(function(candidato){
+    if(!path && getComputedStyle(candidato).display !== 'none') path = candidato;
+  });
+  return path;
+}
+
+// Reseta a timeline para o estado inicial (linha e pontos invisíveis) e volta
+// a observá-la, para que a próxima vez que ela entrar na tela anime do zero.
+// Chamado pela navegação do menu — o scroll natural NÃO reseta (ver observer abaixo).
+function resetTimelineAnimation(){
+  if(!timelineEl) return;
+
+  var path = tlPathAtivo();
+  if(path) path.classList.remove('start-drawing');
+
+  timelineEl.querySelectorAll('.tl-item').forEach(function(item){
+    item.classList.remove('show-scroll');
+  });
+
+  if(timelineObserver) timelineObserver.observe(timelineEl);
+}
+
+if(timelineEl){
+  timelineObserver = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(!entry.isIntersecting) return;
+
+      var path = tlPathAtivo();
+      if(path) path.classList.add('start-drawing');
+
+      entry.target.querySelectorAll('.tl-item').forEach(function(item){
+        item.classList.add('show-scroll');
+      });
+
+      timelineObserver.unobserve(entry.target);
+    });
+  }, { threshold:0.3 });
+  timelineObserver.observe(timelineEl);
+}
+
+// Navegar pelo menu principal "limpa o palco": qualquer clique reseta a
+// timeline, garantindo que ela anime de novo quando o usuário voltar a vê-la.
+document.querySelectorAll('.navlinks a').forEach(function(link){
+  link.addEventListener('click', resetTimelineAnimation);
+});
+
 var db = firebase.firestore();
 
 // O card único "Editais institucionais" da Transparência agrega as 3 categorias
@@ -68,6 +189,7 @@ function renderizarDocumentos(categoriaSlug){
       var url = doc.url || '#';
       return '<div class="doc-row"><span class="title">' + titulo + '</span><span class="date">' + data + '</span><a class="dl" href="' + url + '" target="_blank" rel="noopener">PDF ↓</a></div>';
     }).join('');
+    revelarConteudoDinamico();
   });
 }
 
@@ -131,6 +253,7 @@ documentosProntos.then(function(){
     editalList.insertAdjacentHTML('afterbegin', htmlDocsReais);
   }
   aplicarFiltroEditais();
+  revelarConteudoDinamico();
 });
 
 // ---- Notícias (carrossel de imagens) ----

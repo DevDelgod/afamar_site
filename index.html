@@ -4,8 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AFAMAR — Redesign completo</title>
+<link rel="icon" type="image/avif" href="assets/logo_afamar.avif">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <link rel="stylesheet" href="css/style.css">
@@ -14,7 +15,7 @@
 
 <header>
   <div class="nav">
-    <div class="brand" data-goto="home"><span class="mark"></span>AFAMAR</div>
+    <div class="brand" data-goto="home"><img class="mark" src="assets/logo_afamar.avif" alt="AFAMAR">AFAMAR</div>
     <nav class="navlinks">
       <a data-goto="home">Início</a>
       <a data-goto="sobre">Quem somos</a>
@@ -102,11 +103,15 @@
           <p>A partir das parcerias, a Associação adquiriu as manivas e sementes do aipim rosa, amarelo e branco, com melhoramentos genéticos que se adaptaram perfeitamente ao solo da região, com alta produtividade de desempenho nas raízes.</p>
         </div>
         <div class="timeline">
-          <div class="tl-item"><b>2017*</b><span>Produtores familiares se organizam em Maricá</span></div>
-          <div class="tl-item"><b>2019*</b><span>Formalização da AFAMAR</span></div>
-          <div class="tl-item"><b>2020*</b><span>Testes de plantio com novas espécies e técnicas</span></div>
-          <div class="tl-item"><b>2022*</b><span>Parceria com a Embrapa para melhoramento do aipim</span></div>
-          <div class="tl-item"><b>Hoje*</b><span>2ha de cana-de-açúcar e ~20 mil mudas distribuídas</span></div>
+          <svg class="tl-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <path class="tl-path tl-path-desktop" d="M8,0 C8,11 32,11 32,22 C32,33.5 8,33.5 8,45 C8,56.5 32,56.5 32,68 C32,79 8,79 8,90"></path>
+            <path class="tl-path tl-path-mobile" d="M4,0 C4,11 24,11 24,22 C24,33.5 4,33.5 4,45 C4,56.5 24,56.5 24,68 C24,79 4,79 4,90"></path>
+          </svg>
+          <div class="tl-item"><div class="tl-text"><b>2017</b><span>Produtores familiares se organizam em Maricá</span></div></div>
+          <div class="tl-item"><div class="tl-text"><b>2019</b><span>Formalização da AFAMAR</span></div></div>
+          <div class="tl-item"><div class="tl-text"><b>2020</b><span>Testes de plantio com novas espécies e técnicas</span></div></div>
+          <div class="tl-item"><div class="tl-text"><b>2022</b><span>Parceria com a Embrapa para melhormento do aipim</span></div></div>
+          <div class="tl-item"><div class="tl-text"><b>Hoje</b><span>18 Colégios abastecidos e +50 Toneladas distribuídas</span></div></div>
         </div>
       </div>
     </section>
@@ -149,9 +154,9 @@
       </div>
       <h3 class="apoio-subhead">Parceiros</h3>
       <div class="parceiros-grid">
-        <img class="parceiro-logo" src="assets/ibs_logoparceiro.avif" alt="IBS">
-        <img class="parceiro-logo" src="assets/ictim_logoparceiros.avif" alt="ICTIM">
         <img class="parceiro-logo" src="assets/rural_logoparceiro.avif" alt="Rural">
+        <img class="parceiro-logo" src="assets/ictim_logoparceiros.avif" alt="ICTIM">
+        <img class="parceiro-logo" src="assets/ibs_logoparceiro.avif" alt="IBS">
       </div>
     </section>
   </div>
