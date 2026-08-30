@@ -37,7 +37,7 @@
   section{ padding:56px 0; }
   .section-head{ display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:30px; gap:20px; flex-wrap:wrap;}
   .section-head h2{ font-size:26px; color:var(--papel); }
-  .section-head p{ font-size:14px; color:var(--tinta-suave); max-width:44ch; }
+  .section-head p{ font-size:14px; line-height:1.7; color:var(--tinta-suave); max-width:900px; }
   .eyebrow{ font-size:13px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ocre-400); font-weight:600; margin-bottom:14px;}
 
   .btn{ padding:12px 22px; border-radius:999px; font-size:14px; font-weight:600; display:inline-block; cursor:pointer; }
