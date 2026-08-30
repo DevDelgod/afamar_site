@@ -199,35 +199,99 @@ document.querySelectorAll('.transp-item[data-categoria]').forEach(function(item)
 var tabs = document.querySelectorAll('.tab');
 var editalList = document.getElementById('editalList');
 var empty = document.getElementById('editalEmpty');
+var editalPaginacao = document.getElementById('editalPaginacao');
+var editalPorPaginaSelect = document.getElementById('edital-por-pagina');
 
 function filtroEditalAtivo(){
   var ativa = document.querySelector('.tab.is-active');
   return ativa ? ativa.getAttribute('data-tab') : 'todos';
 }
 
+// Paginação client-side: a lista inteira já está no DOM (estática + real do
+// Firestore), então paginar é só decidir quais linhas filtradas ganham a
+// classe "show" — o CSS que já existia cuida da exibição.
+var EDITAIS_POR_PAGINA_PADRAO = 6;
+var editaisPorPagina = EDITAIS_POR_PAGINA_PADRAO;
+var editalPaginaAtual = 1;
+
+function linhasEditalFiltradas(filter){
+  return Array.prototype.filter.call(document.querySelectorAll('.edital-row'), function(row){
+    return filter === 'todos' || row.getAttribute('data-proj') === filter;
+  });
+}
+
+function irParaPaginaEdital(pagina){
+  editalPaginaAtual = pagina;
+  aplicarFiltroEditais();
+  editalList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderizarPaginacaoEditais(totalItens, totalPaginas){
+  editalPaginacao.innerHTML = '';
+
+  if(totalItens <= editaisPorPagina){
+    editalPaginacao.style.display = 'none';
+    return;
+  }
+  editalPaginacao.style.display = 'flex';
+
+  function criarBotaoPagina(texto, classeExtra, pagina, desabilitado){
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'pagina-btn' + (classeExtra ? ' ' + classeExtra : '');
+    btn.textContent = texto;
+    btn.disabled = !!desabilitado;
+    btn.addEventListener('click', function(){ irParaPaginaEdital(pagina); });
+    return btn;
+  }
+
+  editalPaginacao.appendChild(criarBotaoPagina('← Anterior', 'pagina-nav', editalPaginaAtual - 1, editalPaginaAtual === 1));
+  for(var i = 1; i <= totalPaginas; i++){
+    var classeAtual = i === editalPaginaAtual ? 'pagina-num is-active' : 'pagina-num';
+    editalPaginacao.appendChild(criarBotaoPagina(String(i), classeAtual, i, false));
+  }
+  editalPaginacao.appendChild(criarBotaoPagina('Próximo →', 'pagina-nav', editalPaginaAtual + 1, editalPaginaAtual === totalPaginas));
+}
+
 function aplicarFiltroEditais(){
   var filter = filtroEditalAtivo();
-  var visibleCount = 0;
+  var linhas = linhasEditalFiltradas(filter);
+  var totalPaginas = Math.max(1, Math.ceil(linhas.length / editaisPorPagina));
+  if(editalPaginaAtual > totalPaginas) editalPaginaAtual = totalPaginas;
+
+  var inicio = (editalPaginaAtual - 1) * editaisPorPagina;
+  var linhasDaPagina = linhas.slice(inicio, inicio + editaisPorPagina);
+
   document.querySelectorAll('.edital-row').forEach(function(row){
-    var match = filter === 'todos' || row.getAttribute('data-proj') === filter;
-    row.classList.toggle('show', match);
-    if(match) visibleCount++;
+    row.classList.remove('show');
   });
-  empty.style.display = visibleCount === 0 ? 'block' : 'none';
+  linhasDaPagina.forEach(function(row){ row.classList.add('show'); });
+
+  empty.style.display = linhas.length === 0 ? 'block' : 'none';
+  renderizarPaginacaoEditais(linhas.length, totalPaginas);
 }
 
 tabs.forEach(function(tab){
   tab.addEventListener('click', function(){
     tabs.forEach(function(t){ t.classList.remove('is-active'); });
     tab.classList.add('is-active');
+    editalPaginaAtual = 1;
     aplicarFiltroEditais();
   });
 });
 
+if(editalPorPaginaSelect){
+  editalPorPaginaSelect.addEventListener('change', function(){
+    editaisPorPagina = parseInt(editalPorPaginaSelect.value, 10) || EDITAIS_POR_PAGINA_PADRAO;
+    editalPaginaAtual = 1;
+    aplicarFiltroEditais();
+  });
+}
+
 // Rótulos das tags de status exibidas nos editais reais (Firestore). Cópia
 // de EDITAL_STATUSES em js/admin.js — um status novo precisa ser acrescentado
 // nos dois arquivos.
-var EDITAL_STATUS_CONFIG = { aberto: 'Aberto', resultado: 'Resultado', andamento: 'Em Andamento' };
+var EDITAL_STATUS_CONFIG = { aberto: 'Aberto', prorrogado: 'Prorrogado', encerrado: 'Encerrado', resultado: 'Resultado', deserto: 'Deserto', cancelado: 'Cancelado' };
 
 function montarTagStatusEdital(status){
   var rotulo = EDITAL_STATUS_CONFIG[status];

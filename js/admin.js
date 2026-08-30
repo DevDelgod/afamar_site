@@ -40,7 +40,7 @@ auth.onAuthStateChanged(function(user){
 // Único lugar para adicionar/renomear um status: o <select> dos formulários
 // abaixo é gerado a partir daqui. A tag exibida no site público (js/main.js)
 // usa uma cópia deste dicionário — mantenha os dois em sincronia.
-var EDITAL_STATUSES = { aberto: 'Aberto', resultado: 'Resultado', andamento: 'Em Andamento' };
+var EDITAL_STATUSES = { aberto: 'Aberto', prorrogado: 'Prorrogado', encerrado: 'Encerrado', resultado: 'Resultado', deserto: 'Deserto', cancelado: 'Cancelado' };
 // Categorias de documento que representam editais e por isso ganham o campo de status.
 var CATEGORIAS_EDITAL = ['merenda', 'farinha', 'geral'];
 
