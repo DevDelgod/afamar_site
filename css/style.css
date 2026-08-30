@@ -163,6 +163,21 @@
   .parceiro-logo{ max-width:160px; max-height:70px; width:auto; height:auto; object-fit:contain; background:var(--papel); border-radius:6px; padding:8px 14px; }
 
   /* ---- TRANSPARENCIA ---- */
+  .editais-destaque{
+    display:flex; align-items:center; justify-content:space-between; gap:24px;
+    background:linear-gradient(135deg, var(--verde-700), var(--verde-950));
+    border:1px solid var(--ocre-400); border-radius:8px;
+    padding:28px 32px; margin-bottom:28px; cursor:pointer;
+    box-shadow:0 8px 22px rgba(0,0,0,0.25);
+    transition:transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out;
+  }
+  .editais-destaque:hover{ transform:translateY(-4px); box-shadow:0 16px 34px rgba(0,0,0,0.4); border-color:var(--ocre-600); }
+  .editais-destaque-tag{ font-size:11px; text-transform:uppercase; letter-spacing:0.06em; font-weight:600; color:var(--verde-900); background:var(--ocre-400); padding:3px 10px; border-radius:2px; display:inline-block; margin-bottom:10px; }
+  .editais-destaque h3{ font-size:20px; color:var(--papel); margin-bottom:6px; }
+  .editais-destaque p{ font-size:14px; color:var(--verde-200); max-width:48ch; }
+  .editais-destaque-seta{ font-size:22px; color:var(--ocre-400); flex-shrink:0; transition:transform 0.3s ease-in-out; }
+  .editais-destaque:hover .editais-destaque-seta{ transform:translateX(6px); }
+
   .transp-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
   .transp-item{ border:1px solid var(--linha); border-radius:4px; padding:18px; font-size:13px; color:var(--tinta-suave); cursor:pointer; background:var(--verde-700); box-shadow:0 4px 10px rgba(0,0,0,0.15); transition:transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out; }
   .transp-item:hover{ border-color:var(--verde-500); transform:translateY(-5px); box-shadow:0 12px 26px rgba(0,0,0,0.35); }
@@ -282,6 +297,8 @@
     .tl-item:nth-of-type(3){ left:4%; }
     .tl-item:nth-of-type(4){ left:24%; }
     .tl-item:nth-of-type(5){ left:4%; }
+    .editais-destaque{ flex-direction:column; align-items:flex-start; gap:14px; padding:24px; }
+    .editais-destaque-seta{ align-self:flex-end; }
     .materia-cabecalho h1{ font-size:28px; }
     .galeria-grupo.pair{ grid-template-columns:1fr; }
     .galeria-grupo.full img{ max-height:360px; }
