@@ -224,6 +224,16 @@ tabs.forEach(function(tab){
   });
 });
 
+// Rótulos das tags de status exibidas nos editais reais (Firestore). Cópia
+// de EDITAL_STATUSES em js/admin.js — um status novo precisa ser acrescentado
+// nos dois arquivos.
+var EDITAL_STATUS_CONFIG = { aberto: 'Aberto', resultado: 'Resultado', andamento: 'Em Andamento' };
+
+function montarTagStatusEdital(status){
+  var rotulo = EDITAL_STATUS_CONFIG[status];
+  return rotulo ? '<span class="badge ' + status + '">' + rotulo + '</span>' : '';
+}
+
 // Injeta na lista de Editais os documentos reais enviados pelo admin,
 // usando a mesma categoria (merenda/farinha/geral) como data-proj para
 // que o filtro por abas já existente funcione sem mudanças.
@@ -237,7 +247,7 @@ documentosProntos.then(function(){
       var url = doc.url || '#';
       htmlDocsReais += '<div class="edital-row show" data-proj="' + proj + '">' +
         '<div class="edital-left"><span class="num">' + data + '</span><span class="title">' + titulo + '</span></div>' +
-        '<div class="edital-right"><a class="dl-e" href="' + url + '" target="_blank" rel="noopener">PDF ↓</a></div>' +
+        '<div class="edital-right">' + montarTagStatusEdital(doc.status) + '<a class="dl-e" href="' + url + '" target="_blank" rel="noopener">PDF ↓</a></div>' +
         '</div>';
     });
   });

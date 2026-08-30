@@ -36,11 +36,50 @@ auth.onAuthStateChanged(function(user){
   }
 });
 
+// ---- Status do edital (configuração escalável) ----
+// Único lugar para adicionar/renomear um status: o <select> dos formulários
+// abaixo é gerado a partir daqui. A tag exibida no site público (js/main.js)
+// usa uma cópia deste dicionário — mantenha os dois em sincronia.
+var EDITAL_STATUSES = { aberto: 'Aberto', resultado: 'Resultado', andamento: 'Em Andamento' };
+// Categorias de documento que representam editais e por isso ganham o campo de status.
+var CATEGORIAS_EDITAL = ['merenda', 'farinha', 'geral'];
+
+function categoriaEhEdital(categoria){
+  return CATEGORIAS_EDITAL.indexOf(categoria) !== -1;
+}
+
+function popularSelectStatus(selectEl){
+  Object.keys(EDITAL_STATUSES).forEach(function(chave){
+    var opt = document.createElement('option');
+    opt.value = chave;
+    opt.textContent = EDITAL_STATUSES[chave];
+    selectEl.appendChild(opt);
+  });
+}
+
+// Mostra o campo de status só quando a categoria escolhida é um edital;
+// nas demais (CNDs, atas, calendário etc.) o campo não faz sentido.
+function atualizarCampoStatus(categoria, campoEl, selectEl){
+  var ehEdital = categoriaEhEdital(categoria);
+  campoEl.style.display = ehEdital ? 'block' : 'none';
+  selectEl.required = ehEdital;
+  if(!ehEdital) selectEl.value = '';
+}
+
+var docCategoria = document.getElementById('doc-categoria');
+var docStatusField = document.getElementById('doc-status-field');
+var docStatus = document.getElementById('doc-status');
+popularSelectStatus(docStatus);
+docCategoria.addEventListener('change', function(){
+  atualizarCampoStatus(docCategoria.value, docStatusField, docStatus);
+});
+
 uploadForm.addEventListener('submit', function(e){
   e.preventDefault();
 
   var titulo = document.getElementById('doc-titulo').value;
   var categoria = document.getElementById('doc-categoria').value;
+  var status = categoriaEhEdital(categoria) ? docStatus.value : '';
   var fileInput = document.getElementById('doc-file');
   var file = fileInput.files[0];
 
@@ -66,17 +105,20 @@ uploadForm.addEventListener('submit', function(e){
       if(!data.secure_url){
         throw new Error(data.error ? data.error.message : 'Falha no upload para o Cloudinary.');
       }
-      return db.collection('documentos').add({
+      var novoDocumento = {
         titulo: titulo,
         categoria: categoria,
         url: data.secure_url,
         publicId: data.public_id,
         data: firebase.firestore.FieldValue.serverTimestamp()
-      });
+      };
+      if(status) novoDocumento.status = status;
+      return db.collection('documentos').add(novoDocumento);
     })
     .then(function(){
       alert('Documento enviado com sucesso!');
       uploadForm.reset();
+      docStatusField.style.display = 'none';
     })
     .catch(function(err){
       alert('Erro ao enviar documento: ' + err.message);
@@ -222,11 +264,21 @@ var formEditar = document.getElementById('form-editar');
 var btnCancelarEdicao = document.getElementById('btn-cancelar-edicao');
 var editandoId = null;
 
+var editCategoria = document.getElementById('edit-categoria');
+var editStatusField = document.getElementById('edit-status-field');
+var editStatus = document.getElementById('edit-status');
+popularSelectStatus(editStatus);
+editCategoria.addEventListener('change', function(){
+  atualizarCampoStatus(editCategoria.value, editStatusField, editStatus);
+});
+
 function abrirModalEdicao(id, dados){
   editandoId = id;
   document.getElementById('edit-titulo').value = dados.titulo || '';
   document.getElementById('edit-categoria').value = dados.categoria || '';
   document.getElementById('edit-file').value = '';
+  editStatus.value = dados.status || '';
+  atualizarCampoStatus(dados.categoria, editStatusField, editStatus);
   modalEditar.classList.add('is-open');
 }
 
@@ -256,6 +308,11 @@ formEditar.addEventListener('submit', function(e){
     titulo: novoTitulo,
     categoria: novaCategoria
   };
+  if(categoriaEhEdital(novaCategoria)){
+    atualizacao.status = editStatus.value;
+  } else {
+    atualizacao.status = firebase.firestore.FieldValue.delete();
+  }
 
   var preparo;
   if(novoArquivo){
