@@ -1,0 +1,48 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function autenticado() {
+      return request.auth != null;
+    }
+
+    function camposValidos(campos) {
+      return campos.keys().hasAll(['titulo']) && campos.titulo is string;
+    }
+
+    // Documentos institucionais (editais, transparência etc.) — exibidos
+    // publicamente no site; só o admin autenticado cria/edita/exclui.
+    match /documentos/{docId} {
+      allow read: if true;
+      allow create: if autenticado()
+        && camposValidos(request.resource.data)
+        && request.resource.data.categoria is string
+        && request.resource.data.url is string;
+      allow update, delete: if autenticado();
+    }
+
+    // Notícias — mesma lógica: leitura pública, escrita só autenticada.
+    match /noticias/{noticiaId} {
+      allow read: if true;
+      allow create: if autenticado()
+        && camposValidos(request.resource.data)
+        && request.resource.data.texto is string
+        && request.resource.data.imagens is list
+        && request.resource.data.imagens.size() >= 1
+        && request.resource.data.imagens.size() <= 5;
+      allow update, delete: if autenticado();
+    }
+
+    // Fila interna de limpeza do Cloudinary (nunca lida pelo site público,
+    // só usada pelo painel admin) — acesso exclusivo do admin autenticado.
+    match /cloudinary_pendente_exclusao/{itemId} {
+      allow read, write: if autenticado();
+    }
+
+    // Nega qualquer coleção não prevista acima.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
