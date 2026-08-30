@@ -23,7 +23,7 @@
       <a data-goto="projetos">Projetos</a>
       <a data-goto="transparencia">Transparência</a>
       <a data-goto="editais">Editais</a>
-      <a data-goto="noticias">Notícias</a>
+      <a href="noticias.html">Notícias</a>
       <a data-goto="contato">Contato</a>
     </nav>
   </div>
@@ -83,7 +83,7 @@
     <section>
       <div class="section-head">
         <div><h2>Notícias</h2><p>O que está acontecendo na lavoura e nas escolas.</p></div>
-        <a class="proj-link" data-goto="noticias">Ver todas →</a>
+        <a class="proj-link" href="noticias.html">Ver todas →</a>
       </div>
       <div class="noticias-grid" id="noticias-home-grid"></div>
       <p id="noticias-home-vazio" style="display:none; font-size:13px; color:var(--tinta-suave); padding:14px 2px;">Nenhuma notícia publicada ainda.</p>
@@ -254,16 +254,6 @@
     </section>
   </div>
 
-  <!-- NOTICIAS -->
-  <div class="page" data-page="noticias">
-    <section style="padding-top:44px;">
-      <div class="eyebrow">Comunicação</div>
-      <h2 style="font-size:30px; color:var(--verde-900); margin-bottom:30px;">Notícias</h2>
-      <div class="noticias-grid" id="noticias-full-grid"></div>
-      <p id="noticias-full-vazio" style="display:none; font-size:13px; color:var(--tinta-suave); padding:18px 2px;">Nenhuma notícia publicada ainda.</p>
-    </section>
-  </div>
-
   <!-- CONTATO -->
   <div class="page" data-page="contato">
     <section style="padding-top:44px;">
@@ -340,6 +330,7 @@
 </footer>
 
 <script src="js/firebase-config.js"></script>
+<script src="js/noticias-utils.js"></script>
 <script src="https://www.google.com/recaptcha/api.js?hl=pt-BR"></script>
 <script src="js/main.js"></script>
 

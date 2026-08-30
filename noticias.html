@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notícias — AFAMAR</title>
+<link rel="icon" type="image/avif" href="assets/logo_afamar.avif">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="index.html"><img class="mark" src="assets/logo_afamar.avif" alt="AFAMAR">AFAMAR</a>
+    <nav class="navlinks">
+      <a href="index.html">Início</a>
+      <a href="index.html#sobre">Quem somos</a>
+      <a href="index.html#projetos">Projetos</a>
+      <a href="index.html#transparencia">Transparência</a>
+      <a href="index.html#editais">Editais</a>
+      <a href="noticias.html" class="active">Notícias</a>
+      <a href="index.html#contato">Contato</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <section style="padding-top:44px;">
+    <div class="eyebrow">Comunicação</div>
+    <h2 style="font-size:30px; color:var(--verde-900); margin-bottom:30px;">Notícias</h2>
+    <div class="noticias-archive-grid" id="noticias-grid"></div>
+    <p class="noticias-archive-vazio" id="noticias-vazio" style="display:none;">Nenhuma notícia publicada ainda.</p>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <h5>AFAMAR</h5>
+        <p style="font-size:13px; color:var(--tinta-suave); max-width:32ch;">Associação de Agricultura Familiar de Maricá. Av. Pref. Ivan Mundin, nº 996, Araçatiba — Maricá/RJ.</p>
+      </div>
+      <div>
+        <h5>Institucional</h5>
+        <div class="flinks"><a href="index.html#sobre">Quem somos</a><a href="index.html#projetos">Projetos</a></div>
+      </div>
+      <div>
+        <h5>Transparência</h5>
+        <div class="flinks"><a href="index.html#editais">Editais</a><a href="index.html#transparencia">Documentos</a></div>
+      </div>
+    </div>
+    <div class="foot-bottom">© 2026 Associação de Agricultura Familiar de Maricá — Todos os direitos reservados.</div>
+  </div>
+</footer>
+
+<script src="js/firebase-config.js"></script>
+<script src="js/noticias-utils.js"></script>
+<script src="js/noticias.js"></script>
+
+</body>
+</html>

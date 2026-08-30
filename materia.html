@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="materia-page-title">Notícia — AFAMAR</title>
+<link rel="icon" type="image/avif" href="assets/logo_afamar.avif">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="index.html"><img class="mark" src="assets/logo_afamar.avif" alt="AFAMAR">AFAMAR</a>
+    <nav class="navlinks">
+      <a href="index.html">Início</a>
+      <a href="index.html#sobre">Quem somos</a>
+      <a href="index.html#projetos">Projetos</a>
+      <a href="index.html#transparencia">Transparência</a>
+      <a href="index.html#editais">Editais</a>
+      <a href="noticias.html" class="active">Notícias</a>
+      <a href="index.html#contato">Contato</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <article id="materia-conteudo">
+    <section class="materia-topo">
+      <a class="materia-voltar" href="noticias.html">← Voltar para Notícias</a>
+      <div class="materia-cabecalho">
+        <div class="eyebrow">Notícias</div>
+        <h1 id="materia-titulo">Carregando…</h1>
+        <div class="materia-data" id="materia-data"></div>
+      </div>
+    </section>
+
+    <div class="materia-galeria" id="materia-galeria"></div>
+
+    <div class="materia-corpo" id="materia-corpo"></div>
+  </article>
+
+  <section class="materia-estado" id="materia-erro">
+    <h2>Notícia não encontrada</h2>
+    <p>O link pode estar incorreto ou a notícia foi removida.</p>
+    <a class="btn btn-primary" href="noticias.html">Voltar para Notícias</a>
+  </section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <h5>AFAMAR</h5>
+        <p style="font-size:13px; color:var(--tinta-suave); max-width:32ch;">Associação de Agricultura Familiar de Maricá. Av. Pref. Ivan Mundin, nº 996, Araçatiba — Maricá/RJ.</p>
+      </div>
+      <div>
+        <h5>Institucional</h5>
+        <div class="flinks"><a href="index.html#sobre">Quem somos</a><a href="index.html#projetos">Projetos</a></div>
+      </div>
+      <div>
+        <h5>Transparência</h5>
+        <div class="flinks"><a href="index.html#editais">Editais</a><a href="index.html#transparencia">Documentos</a></div>
+      </div>
+    </div>
+    <div class="foot-bottom">© 2026 Associação de Agricultura Familiar de Maricá — Todos os direitos reservados.</div>
+  </div>
+</footer>
+
+<script src="js/firebase-config.js"></script>
+<script src="js/noticias-utils.js"></script>
+<script src="js/materia.js"></script>
+
+</body>
+</html>
