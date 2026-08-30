@@ -343,3 +343,142 @@ db.collection('noticias').orderBy('data', 'desc').get()
     renderizarNoticias('noticias-home-grid', 'noticias-home-vazio', []);
     renderizarNoticias('noticias-full-grid', 'noticias-full-vazio', []);
   });
+
+// ---- Formulário de contato (EmailJS) ----
+// Substitua os três valores abaixo pelas credenciais da sua conta EmailJS
+// (Account > API Keys para a public key; Email Services e Email Templates
+// para os IDs). Nada mais no código precisa mudar depois disso.
+var EMAILJS_PUBLIC_KEY = 'w2j-Ye1POs-l7OuzO';
+var EMAILJS_SERVICE_ID = 'service_gidputj';
+var EMAILJS_TEMPLATE_ID = 'template_wfpumqc';
+
+if(window.emailjs) emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
+// ---- reCAPTCHA v2 (anti-spam do formulário de contato) ----
+// Gere a site key em https://www.google.com/recaptcha/admin (cadastre o
+// domínio do site) e substitua abaixo. Depois, no painel do EmailJS, ative
+// "reCAPTCHA v2" nas configurações do seu Email Service e informe a mesma
+// site key + a secret key gerada junto — é o EmailJS quem valida o token.
+var RECAPTCHA_SITE_KEY = '6LeldKAtAAAAAIVHXPZlElfqlYy1uwNu1WWjrzVa';
+var recaptchaWidgetId = null;
+var recaptchaContainer = document.getElementById('contato-recaptcha');
+
+function renderizarRecaptcha(){
+  if(!recaptchaContainer || !window.grecaptcha || !grecaptcha.render) return;
+  recaptchaWidgetId = grecaptcha.render(recaptchaContainer, {
+    sitekey: RECAPTCHA_SITE_KEY,
+    theme: 'dark'
+  });
+}
+
+// grecaptcha existe assim que o script carrega, mas o método render() só
+// fica pronto de fato um instante depois — sem o grecaptcha.ready(), a
+// primeira chamada aqui podia falhar silenciosamente (widgetId ficava null).
+if(recaptchaContainer && window.grecaptcha && grecaptcha.ready){
+  grecaptcha.ready(renderizarRecaptcha);
+} else {
+  renderizarRecaptcha();
+}
+
+var toastEl = document.getElementById('toast');
+var toastTimeoutId = null;
+
+function mostrarToast(mensagem, tipo){
+  if(!toastEl) return;
+  toastEl.textContent = mensagem;
+  toastEl.classList.remove('toast-erro');
+  if(tipo === 'erro') toastEl.classList.add('toast-erro');
+  toastEl.classList.add('is-visible');
+
+  if(toastTimeoutId) clearTimeout(toastTimeoutId);
+  toastTimeoutId = setTimeout(function(){
+    toastEl.classList.remove('is-visible');
+  }, 5000);
+}
+
+var contatoForm = document.getElementById('contato-form');
+
+function validarEmail(email){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function marcarErroCampo(input, temErro){
+  var campo = input.closest('.form-field');
+  if(campo) campo.classList.toggle('has-error', temErro);
+}
+
+function validarFormularioContato(dados){
+  var valido = true;
+
+  [
+    ['nome', dados.nome.trim().length > 0],
+    ['email', validarEmail(dados.email.trim())],
+    ['telefone', dados.telefone.trim().length > 0],
+    ['assunto', dados.assunto.trim().length > 0],
+    ['mensagem', dados.mensagem.trim().length > 0]
+  ].forEach(function(par){
+    var input = document.getElementById('contato-' + par[0]);
+    var campoValido = par[1];
+    marcarErroCampo(input, !campoValido);
+    if(!campoValido) valido = false;
+  });
+
+  return valido;
+}
+
+if(contatoForm){
+  contatoForm.addEventListener('submit', function(e){
+    e.preventDefault();
+
+    var dados = {
+      nome: document.getElementById('contato-nome').value,
+      email: document.getElementById('contato-email').value,
+      telefone: document.getElementById('contato-telefone').value,
+      assunto: document.getElementById('contato-assunto').value,
+      mensagem: document.getElementById('contato-mensagem').value
+    };
+
+    var formularioValido = validarFormularioContato(dados);
+
+    var recaptchaToken = recaptchaWidgetId !== null ? grecaptcha.getResponse(recaptchaWidgetId) : '';
+    var recaptchaOk = recaptchaWidgetId === null || recaptchaToken !== '';
+    var recaptchaCampo = document.getElementById('contato-recaptcha-field');
+    if(recaptchaCampo) recaptchaCampo.classList.toggle('has-error', !recaptchaOk);
+    if(!recaptchaOk) formularioValido = false;
+
+    if(!formularioValido){
+      mostrarToast('Confira os campos destacados antes de enviar.', 'erro');
+      return;
+    }
+
+    var templateParams = {
+      name: dados.nome,
+      email: dados.email,
+      phone: dados.telefone,
+      title: dados.assunto,
+      message: dados.mensagem,
+      time: new Date().toLocaleString('pt-BR')
+    };
+    if(recaptchaWidgetId !== null) templateParams['g-recaptcha-response'] = recaptchaToken;
+
+    var botaoEnviar = document.getElementById('btn-contato-enviar');
+    var textoOriginal = botaoEnviar.textContent;
+    botaoEnviar.disabled = true;
+    botaoEnviar.textContent = 'Enviando...';
+
+    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
+      .then(function(){
+        mostrarToast('Mensagem enviada! Em breve entraremos em contato.', 'sucesso');
+        contatoForm.reset();
+      })
+      .catch(function(err){
+        console.error('Erro ao enviar mensagem de contato:', err);
+        mostrarToast('Não foi possível enviar sua mensagem agora. Tente novamente em instantes.', 'erro');
+      })
+      .finally(function(){
+        botaoEnviar.disabled = false;
+        botaoEnviar.textContent = textoOriginal;
+        if(recaptchaWidgetId !== null) grecaptcha.reset(recaptchaWidgetId);
+      });
+  });
+}
