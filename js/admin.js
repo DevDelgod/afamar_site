@@ -430,6 +430,22 @@ var noticiaImagensPreview = document.getElementById('noticia-imagens-preview');
 var noticiaManageList = document.getElementById('noticia-manage-list');
 var noticiaManageVazio = document.getElementById('noticia-manage-vazio');
 
+// Gerenciador de estado das imagens selecionadas para a nova notícia. O
+// FileList nativo do <input type="file"> é somente leitura — não dá para
+// remover um item individual dele —, então mantemos aqui um DataTransfer,
+// que expõe uma FileList (via .files) e pode ser reatribuído de volta ao
+// input (input.files = ...) para manter os dois em sincronia.
+var selectedNewsFiles = new DataTransfer();
+
+function atualizarInputImagensNoticia(){
+  noticiaImagensInput.files = selectedNewsFiles.files;
+}
+
+function renumerarPreviewsImagens(container){
+  var labels = container.querySelectorAll('.idx-label');
+  labels.forEach(function(label, indice){ label.textContent = 'Imagem ' + (indice + 1); });
+}
+
 function lerArquivoComoDataURL(file){
   return new Promise(function(resolve, reject){
     var reader = new FileReader();
@@ -439,9 +455,23 @@ function lerArquivoComoDataURL(file){
   });
 }
 
-function criarItemPreviewImagem(dataUrl, indice){
+function criarItemPreviewImagem(dataUrl){
   var item = document.createElement('div');
   item.className = 'img-preview-item';
+
+  var btnRemover = document.createElement('button');
+  btnRemover.type = 'button';
+  btnRemover.className = 'img-preview-remove';
+  btnRemover.setAttribute('aria-label', 'Remover imagem');
+  btnRemover.textContent = '×';
+  btnRemover.addEventListener('click', function(){
+    var indice = Array.prototype.indexOf.call(noticiaImagensPreview.children, item);
+    if(indice === -1) return;
+    selectedNewsFiles.items.remove(indice);
+    atualizarInputImagensNoticia();
+    item.remove();
+    renumerarPreviewsImagens(noticiaImagensPreview);
+  });
 
   var img = document.createElement('img');
   img.src = dataUrl;
@@ -449,15 +479,14 @@ function criarItemPreviewImagem(dataUrl, indice){
 
   var label = document.createElement('span');
   label.className = 'idx-label';
-  label.textContent = 'Imagem ' + (indice + 1);
 
   var input = document.createElement('input');
   input.type = 'text';
   input.className = 'noticia-alt-input';
   input.placeholder = 'Texto alternativo (descreva a imagem)';
   input.required = true;
-  input.dataset.idx = String(indice);
 
+  item.appendChild(btnRemover);
   item.appendChild(img);
   item.appendChild(label);
   item.appendChild(input);
@@ -465,21 +494,22 @@ function criarItemPreviewImagem(dataUrl, indice){
 }
 
 noticiaImagensInput.addEventListener('change', function(){
-  var files = Array.prototype.slice.call(noticiaImagensInput.files);
-  noticiaImagensPreview.innerHTML = '';
+  var novosArquivos = Array.prototype.slice.call(noticiaImagensInput.files);
+  if(novosArquivos.length === 0) return;
 
-  if(files.length === 0) return;
-
-  if(files.length > 5){
-    alert('Selecione no máximo 5 imagens.');
-    noticiaImagensInput.value = '';
+  if(selectedNewsFiles.files.length + novosArquivos.length > 5){
+    alert('Você pode selecionar no máximo 5 imagens no total.');
+    atualizarInputImagensNoticia();
     return;
   }
 
-  Promise.all(files.map(lerArquivoComoDataURL)).then(function(dataUrls){
-    dataUrls.forEach(function(dataUrl, indice){
-      noticiaImagensPreview.appendChild(criarItemPreviewImagem(dataUrl, indice));
+  Promise.all(novosArquivos.map(lerArquivoComoDataURL)).then(function(dataUrls){
+    novosArquivos.forEach(function(file, indice){
+      selectedNewsFiles.items.add(file);
+      noticiaImagensPreview.appendChild(criarItemPreviewImagem(dataUrls[indice]));
     });
+    atualizarInputImagensNoticia();
+    renumerarPreviewsImagens(noticiaImagensPreview);
   });
 });
 
@@ -507,7 +537,7 @@ noticiaForm.addEventListener('submit', function(e){
 
   var titulo = document.getElementById('noticia-titulo').value;
   var texto = document.getElementById('noticia-texto').value;
-  var files = Array.prototype.slice.call(noticiaImagensInput.files);
+  var files = Array.prototype.slice.call(selectedNewsFiles.files);
   var alts = coletarAltsNoticia();
 
   if(files.length < 1 || files.length > 5){
@@ -535,6 +565,7 @@ noticiaForm.addEventListener('submit', function(e){
       alert('Notícia publicada com sucesso!');
       noticiaForm.reset();
       noticiaImagensPreview.innerHTML = '';
+      selectedNewsFiles = new DataTransfer();
       carregarNoticias();
     })
     .catch(function(err){
@@ -649,9 +680,22 @@ var editNoticiaImagensPreview = document.getElementById('edit-noticia-imagens-pr
 var editandoNoticiaId = null;
 var editandoNoticiaImagens = null;
 
-function criarItemPreviewImagemEdicao(imagem, indice){
+function criarItemPreviewImagemEdicao(imagem){
   var item = document.createElement('div');
   item.className = 'img-preview-item';
+
+  var btnRemover = document.createElement('button');
+  btnRemover.type = 'button';
+  btnRemover.className = 'img-preview-remove';
+  btnRemover.setAttribute('aria-label', 'Remover imagem');
+  btnRemover.textContent = '×';
+  btnRemover.addEventListener('click', function(){
+    var indice = Array.prototype.indexOf.call(editNoticiaImagensPreview.children, item);
+    if(indice === -1) return;
+    editandoNoticiaImagens.splice(indice, 1);
+    item.remove();
+    renumerarPreviewsImagens(editNoticiaImagensPreview);
+  });
 
   var img = document.createElement('img');
   img.src = imagem.url;
@@ -659,15 +703,14 @@ function criarItemPreviewImagemEdicao(imagem, indice){
 
   var label = document.createElement('span');
   label.className = 'idx-label';
-  label.textContent = 'Imagem ' + (indice + 1);
 
   var input = document.createElement('input');
   input.type = 'text';
   input.className = 'noticia-alt-input-edicao';
   input.placeholder = 'Texto alternativo (descreva a imagem)';
   input.value = imagem.alt || '';
-  input.dataset.idx = String(indice);
 
+  item.appendChild(btnRemover);
   item.appendChild(img);
   item.appendChild(label);
   item.appendChild(input);
@@ -682,9 +725,10 @@ function abrirModalEdicaoNoticia(id, dados){
   document.getElementById('edit-noticia-texto').value = dados.texto || '';
 
   editNoticiaImagensPreview.innerHTML = '';
-  editandoNoticiaImagens.forEach(function(imagem, indice){
-    editNoticiaImagensPreview.appendChild(criarItemPreviewImagemEdicao(imagem, indice));
+  editandoNoticiaImagens.forEach(function(imagem){
+    editNoticiaImagensPreview.appendChild(criarItemPreviewImagemEdicao(imagem));
   });
+  renumerarPreviewsImagens(editNoticiaImagensPreview);
 
   modalEditarNoticia.classList.add('is-open');
 }
@@ -703,6 +747,11 @@ modalEditarNoticia.addEventListener('click', function(e){
 formEditarNoticia.addEventListener('submit', function(e){
   e.preventDefault();
   if(!editandoNoticiaId) return;
+
+  if(editandoNoticiaImagens.length === 0){
+    alert('A notícia precisa ter pelo menos 1 imagem.');
+    return;
+  }
 
   var novoTitulo = document.getElementById('edit-noticia-titulo').value;
   var novoTexto = document.getElementById('edit-noticia-texto').value;
