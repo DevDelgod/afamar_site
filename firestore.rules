@@ -34,6 +34,18 @@ service cloud.firestore {
       allow update, delete: if autenticado();
     }
 
+    // Balancetes financeiros — mesma lógica de "documentos": leitura pública,
+    // escrita só autenticada, exibidos na página de Transparência.
+    match /balancetes/{balanceteId} {
+      allow read: if true;
+      allow create: if autenticado()
+        && camposValidos(request.resource.data)
+        && request.resource.data.referencia is string
+        && request.resource.data.status is string
+        && request.resource.data.url is string;
+      allow update, delete: if autenticado();
+    }
+
     // Fila interna de limpeza do Cloudinary (nunca lida pelo site público,
     // só usada pelo painel admin) — acesso exclusivo do admin autenticado.
     match /cloudinary_pendente_exclusao/{itemId} {

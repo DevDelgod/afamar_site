@@ -258,6 +258,51 @@ documentosProntos.then(function(){
   revelarConteudoDinamico();
 });
 
+// ---- Balancetes financeiros (Transparência) ----
+// Rótulos das tags de status. Cópia de BALANCETE_STATUSES em js/admin.js —
+// um status novo precisa ser acrescentado nos dois arquivos.
+var BALANCETE_STATUS_CONFIG = { aprovado: 'Aprovado', analise: 'Em Análise', pendente: 'Pendente' };
+
+function montarTagStatusBalancete(status){
+  var rotulo = BALANCETE_STATUS_CONFIG[status];
+  return rotulo ? '<span class="badge ' + status + '">' + rotulo + '</span>' : '';
+}
+
+// Cópia de formatarReferenciaBalancete em js/admin.js.
+function formatarReferenciaBalancete(referencia){
+  if(!referencia) return '';
+  var partes = String(referencia).split('-');
+  var meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  var mes = meses[parseInt(partes[1], 10) - 1];
+  return mes ? (mes + '/' + partes[0]) : referencia;
+}
+
+var balancetesDoclist = document.getElementById('balancetes-doclist');
+var balancetesVazio = document.getElementById('balancetes-vazio');
+if(balancetesDoclist){
+  db.collection('balancetes').orderBy('referencia', 'desc').get()
+    .then(function(snapshot){
+      if(snapshot.empty){
+        balancetesVazio.style.display = 'block';
+        return;
+      }
+      balancetesDoclist.innerHTML = snapshot.docs.map(function(doc){
+        var d = doc.data();
+        var titulo = (d.titulo || 'Balancete').replace(/</g, '&lt;');
+        var referencia = formatarReferenciaBalancete(d.referencia);
+        var url = d.url || '#';
+        return '<div class="doc-row"><span class="title">' + titulo + '</span>' +
+          '<div class="edital-right"><span class="date">' + referencia + '</span>' +
+          montarTagStatusBalancete(d.status) +
+          '<a class="dl" href="' + url + '" target="_blank" rel="noopener">PDF ↓</a></div></div>';
+      }).join('');
+      revelarConteudoDinamico();
+    })
+    .catch(function(err){
+      console.error('Erro ao carregar balancetes do Firestore:', err);
+    });
+}
+
 // ---- Notícias (prévia na Home — lista completa mora em noticias.html) ----
 // montarCardNoticia/renderizarNoticiasGrid etc. vêm de js/noticias-utils.js
 db.collection('noticias').orderBy('data', 'desc').limit(3).get()

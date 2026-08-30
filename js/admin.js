@@ -48,11 +48,11 @@ function categoriaEhEdital(categoria){
   return CATEGORIAS_EDITAL.indexOf(categoria) !== -1;
 }
 
-function popularSelectStatus(selectEl){
-  Object.keys(EDITAL_STATUSES).forEach(function(chave){
+function popularSelectStatus(selectEl, statusMap){
+  Object.keys(statusMap).forEach(function(chave){
     var opt = document.createElement('option');
     opt.value = chave;
-    opt.textContent = EDITAL_STATUSES[chave];
+    opt.textContent = statusMap[chave];
     selectEl.appendChild(opt);
   });
 }
@@ -69,7 +69,7 @@ function atualizarCampoStatus(categoria, campoEl, selectEl){
 var docCategoria = document.getElementById('doc-categoria');
 var docStatusField = document.getElementById('doc-status-field');
 var docStatus = document.getElementById('doc-status');
-popularSelectStatus(docStatus);
+popularSelectStatus(docStatus, EDITAL_STATUSES);
 docCategoria.addEventListener('change', function(){
   atualizarCampoStatus(docCategoria.value, docStatusField, docStatus);
 });
@@ -267,7 +267,7 @@ var editandoId = null;
 var editCategoria = document.getElementById('edit-categoria');
 var editStatusField = document.getElementById('edit-status-field');
 var editStatus = document.getElementById('edit-status');
-popularSelectStatus(editStatus);
+popularSelectStatus(editStatus, EDITAL_STATUSES);
 editCategoria.addEventListener('change', function(){
   atualizarCampoStatus(editCategoria.value, editStatusField, editStatus);
 });
@@ -350,11 +350,350 @@ formEditar.addEventListener('submit', function(e){
     });
 });
 
+// ---- Gestão de Balancetes (upload de PDF, Firestore, listar/editar/excluir) ----
+// Mesma arquitetura da Gestão de Editais acima (status em dicionário, fila de
+// limpeza do Cloudinary) mais o chip de arquivo removível pedido para o PDF;
+// independente dela, só adiciona.
+var BALANCETE_STATUSES = { aprovado: 'Aprovado', analise: 'Em Análise', pendente: 'Pendente' };
+
+function formatarReferenciaBalancete(referencia){
+  if(!referencia) return '';
+  var partes = String(referencia).split('-');
+  var meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  var mes = meses[parseInt(partes[1], 10) - 1];
+  return mes ? (mes + '/' + partes[0]) : referencia;
+}
+
+// Chip visual (nome do arquivo + botão "×") reaproveitado tanto para o PDF
+// recém-selecionado (criação) quanto para o PDF já salvo (edição — com link
+// "Ver PDF"). onRemover decide o que acontece em cada caso.
+function criarChipArquivo(nome, onRemover, linkUrl){
+  var chip = document.createElement('div');
+  chip.className = 'file-chip';
+
+  var icone = document.createElement('span');
+  icone.className = 'icone';
+  icone.setAttribute('aria-hidden', 'true');
+  icone.textContent = '📄';
+  chip.appendChild(icone);
+
+  var nomeEl = document.createElement('span');
+  nomeEl.className = 'nome';
+  nomeEl.textContent = nome;
+  chip.appendChild(nomeEl);
+
+  if(linkUrl){
+    var link = document.createElement('a');
+    link.href = linkUrl;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.textContent = 'Ver PDF';
+    chip.appendChild(link);
+  }
+
+  var btnRemover = document.createElement('button');
+  btnRemover.type = 'button';
+  btnRemover.className = 'file-chip-remove';
+  btnRemover.setAttribute('aria-label', 'Remover arquivo');
+  btnRemover.textContent = '×';
+  btnRemover.addEventListener('click', onRemover);
+  chip.appendChild(btnRemover);
+
+  return chip;
+}
+
+var balanceteForm = document.getElementById('balancete-form');
+var balanceteFileInput = document.getElementById('balancete-file');
+var balanceteFilePreview = document.getElementById('balancete-file-preview');
+var balanceteStatus = document.getElementById('balancete-status');
+popularSelectStatus(balanceteStatus, BALANCETE_STATUSES);
+
+// Arquivo único selecionado para o novo balancete. Diferente da galeria de
+// imagens da notícia (que precisa de um DataTransfer por ter vários arquivos),
+// aqui basta uma variável simples: só existe um PDF por vez.
+var selectedBalanceteFile = null;
+
+balanceteFileInput.addEventListener('change', function(){
+  var file = balanceteFileInput.files[0] || null;
+  selectedBalanceteFile = file;
+  balanceteFilePreview.innerHTML = '';
+  if(!file) return;
+
+  balanceteFilePreview.appendChild(criarChipArquivo(file.name, function(){
+    balanceteFileInput.value = '';
+    selectedBalanceteFile = null;
+    balanceteFilePreview.innerHTML = '';
+  }));
+});
+
+balanceteForm.addEventListener('submit', function(e){
+  e.preventDefault();
+
+  var titulo = document.getElementById('balancete-titulo').value;
+  var referencia = document.getElementById('balancete-referencia').value;
+  var status = balanceteStatus.value;
+  var file = selectedBalanceteFile;
+
+  if(!file){
+    alert('Selecione um arquivo PDF.');
+    return;
+  }
+
+  var submitBtn = balanceteForm.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Enviando...';
+
+  var formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+  fetch(CLOUDINARY_UPLOAD_URL, { method: 'POST', body: formData })
+    .then(function(res){ return res.json(); })
+    .then(function(data){
+      if(!data.secure_url){
+        throw new Error(data.error ? data.error.message : 'Falha no upload para o Cloudinary.');
+      }
+      return db.collection('balancetes').add({
+        titulo: titulo,
+        referencia: referencia,
+        status: status,
+        url: data.secure_url,
+        publicId: data.public_id,
+        data: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    })
+    .then(function(){
+      alert('Balancete enviado com sucesso!');
+      balanceteForm.reset();
+      balanceteFilePreview.innerHTML = '';
+      selectedBalanceteFile = null;
+      carregarBalancetes();
+    })
+    .catch(function(err){
+      alert('Erro ao enviar balancete: ' + err.message);
+    })
+    .finally(function(){
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Fazer upload';
+    });
+});
+
+var balanceteManageList = document.getElementById('balancete-manage-list');
+var balanceteManageVazio = document.getElementById('balancete-manage-vazio');
+
+function criarLinhaBalancete(id, dados){
+  var row = document.createElement('div');
+  row.className = 'doc-manage-row';
+
+  var info = document.createElement('div');
+  info.className = 'info';
+  var titleEl = document.createElement('span');
+  titleEl.className = 'title';
+  titleEl.textContent = dados.titulo || 'Balancete';
+  var dateEl = document.createElement('span');
+  dateEl.className = 'date';
+  dateEl.textContent = formatarReferenciaBalancete(dados.referencia);
+  info.appendChild(titleEl);
+  info.appendChild(dateEl);
+
+  var actions = document.createElement('div');
+  actions.className = 'actions';
+
+  var btnEditar = document.createElement('button');
+  btnEditar.type = 'button';
+  btnEditar.className = 'btn btn-ghost btn-sm';
+  btnEditar.textContent = 'Editar';
+  btnEditar.addEventListener('click', function(){ abrirModalEdicaoBalancete(id, dados); });
+
+  var btnExcluir = document.createElement('button');
+  btnExcluir.type = 'button';
+  btnExcluir.className = 'btn btn-danger btn-sm';
+  btnExcluir.textContent = 'Excluir';
+  btnExcluir.addEventListener('click', function(){ excluirBalancete(id, dados); });
+
+  actions.appendChild(btnEditar);
+  actions.appendChild(btnExcluir);
+  row.appendChild(info);
+  row.appendChild(actions);
+  return row;
+}
+
+function carregarBalancetes(){
+  balanceteManageVazio.style.display = 'none';
+  balanceteManageList.innerHTML = '<div class="doc-manage-row"><span class="title">Carregando…</span></div>';
+
+  db.collection('balancetes').orderBy('referencia', 'desc').get()
+    .then(function(snapshot){
+      if(snapshot.empty){
+        balanceteManageList.innerHTML = '';
+        balanceteManageVazio.style.display = 'block';
+        return;
+      }
+      balanceteManageList.innerHTML = '';
+      snapshot.forEach(function(doc){
+        balanceteManageList.appendChild(criarLinhaBalancete(doc.id, doc.data()));
+      });
+    })
+    .catch(function(err){
+      balanceteManageList.innerHTML = '';
+      alert('Erro ao carregar balancetes: ' + err.message);
+    });
+}
+
+carregarBalancetes();
+
+function excluirBalancete(id, dados){
+  var ok = confirm('Excluir "' + (dados.titulo || 'este balancete') + '"? Essa ação não pode ser desfeita — o balancete some imediatamente da página pública.');
+  if(!ok) return;
+
+  db.collection('balancetes').doc(id).delete()
+    .then(function(){
+      if(dados.publicId){
+        return db.collection('cloudinary_pendente_exclusao').add({
+          publicId: dados.publicId,
+          titulo: dados.titulo || '',
+          url: dados.url || '',
+          excluidoEm: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+    })
+    .then(function(){
+      if(dados.publicId){
+        alert('Balancete removido do site.\n\nO arquivo ainda ocupa espaço no Cloudinary — o ID "' + dados.publicId + '" foi salvo na coleção "cloudinary_pendente_exclusao" do Firestore para você remover pela Media Library do Cloudinary (ou automatizar a limpeza depois).');
+      } else {
+        alert('Balancete removido do site.');
+      }
+      carregarBalancetes();
+    })
+    .catch(function(err){
+      alert('Erro ao excluir balancete: ' + err.message);
+    });
+}
+
+var modalEditarBalancete = document.getElementById('modal-editar-balancete');
+var formEditarBalancete = document.getElementById('form-editar-balancete');
+var btnCancelarEdicaoBalancete = document.getElementById('btn-cancelar-edicao-balancete');
+var editBalanceteStatus = document.getElementById('edit-balancete-status');
+popularSelectStatus(editBalanceteStatus, BALANCETE_STATUSES);
+var editBalanceteArquivoAtual = document.getElementById('edit-balancete-arquivo-atual');
+var editBalanceteFileField = document.getElementById('edit-balancete-file-field');
+var editBalanceteFileInput = document.getElementById('edit-balancete-file');
+var editandoBalanceteId = null;
+var editandoBalanceteDados = null;
+var editandoBalanceteArquivoRemovido = false;
+
+// Mostra o PDF já salvo como um chip removível; só revela o campo de upload
+// (e passa a exigi-lo) se o admin clicar no "×" para trocar o arquivo.
+function renderizarArquivoAtualBalancete(dados){
+  editandoBalanceteArquivoRemovido = false;
+  editBalanceteFileField.style.display = 'none';
+  editBalanceteFileInput.required = false;
+  editBalanceteFileInput.value = '';
+  editBalanceteArquivoAtual.innerHTML = '';
+
+  editBalanceteArquivoAtual.appendChild(criarChipArquivo(dados.titulo || 'Balancete atual', function(){
+    editandoBalanceteArquivoRemovido = true;
+    editBalanceteArquivoAtual.innerHTML = '';
+    editBalanceteFileField.style.display = 'block';
+    editBalanceteFileInput.required = true;
+  }, dados.url));
+}
+
+function abrirModalEdicaoBalancete(id, dados){
+  editandoBalanceteId = id;
+  editandoBalanceteDados = dados;
+  document.getElementById('edit-balancete-titulo').value = dados.titulo || '';
+  document.getElementById('edit-balancete-referencia').value = dados.referencia || '';
+  editBalanceteStatus.value = dados.status || '';
+  renderizarArquivoAtualBalancete(dados);
+  modalEditarBalancete.classList.add('is-open');
+}
+
+function fecharModalEdicaoBalancete(){
+  modalEditarBalancete.classList.remove('is-open');
+  editandoBalanceteId = null;
+  editandoBalanceteDados = null;
+}
+
+btnCancelarEdicaoBalancete.addEventListener('click', fecharModalEdicaoBalancete);
+modalEditarBalancete.addEventListener('click', function(e){
+  if(e.target === modalEditarBalancete) fecharModalEdicaoBalancete();
+});
+
+formEditarBalancete.addEventListener('submit', function(e){
+  e.preventDefault();
+  if(!editandoBalanceteId) return;
+
+  var novoArquivo = editBalanceteFileInput.files[0];
+  if(editandoBalanceteArquivoRemovido && !novoArquivo){
+    alert('Selecione o novo arquivo PDF.');
+    return;
+  }
+
+  var dadosAnteriores = editandoBalanceteDados;
+  var atualizacao = {
+    titulo: document.getElementById('edit-balancete-titulo').value,
+    referencia: document.getElementById('edit-balancete-referencia').value,
+    status: editBalanceteStatus.value
+  };
+
+  var salvarBtn = formEditarBalancete.querySelector('button[type="submit"]');
+  salvarBtn.disabled = true;
+  salvarBtn.textContent = 'Salvando...';
+
+  var preparo;
+  if(novoArquivo){
+    var formData = new FormData();
+    formData.append('file', novoArquivo);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    preparo = fetch(CLOUDINARY_UPLOAD_URL, { method: 'POST', body: formData })
+      .then(function(res){ return res.json(); })
+      .then(function(data){
+        if(!data.secure_url){
+          throw new Error(data.error ? data.error.message : 'Falha no upload do novo PDF.');
+        }
+        atualizacao.url = data.secure_url;
+        atualizacao.publicId = data.public_id;
+      });
+  } else {
+    preparo = Promise.resolve();
+  }
+
+  preparo
+    .then(function(){
+      return db.collection('balancetes').doc(editandoBalanceteId).update(atualizacao);
+    })
+    .then(function(){
+      // Arquivo trocado: o PDF antigo fica órfão no Cloudinary — mesma fila
+      // de limpeza usada em excluirDocumento()/excluirBalancete().
+      if(novoArquivo && dadosAnteriores.publicId){
+        return db.collection('cloudinary_pendente_exclusao').add({
+          publicId: dadosAnteriores.publicId,
+          titulo: dadosAnteriores.titulo || '',
+          url: dadosAnteriores.url || '',
+          excluidoEm: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+    })
+    .then(function(){
+      alert('Balancete atualizado com sucesso!');
+      fecharModalEdicaoBalancete();
+      carregarBalancetes();
+    })
+    .catch(function(err){
+      alert('Erro ao salvar alterações: ' + err.message);
+    })
+    .finally(function(){
+      salvarBtn.disabled = false;
+      salvarBtn.textContent = 'Salvar alterações';
+    });
+});
+
 // ---- Navegação do painel (sidebar / abas) ----
 var sidebarLinks = document.querySelectorAll('.sidebar-link[data-tab]');
 var tabPanels = document.querySelectorAll('.tab-panel[data-tab-panel]');
 var adminPageTitle = document.getElementById('admin-page-title');
-var tituloPorAba = { editais: 'Gestão de Editais', noticias: 'Gestão de Notícias' };
+var tituloPorAba = { editais: 'Gestão de Editais', balancetes: 'Gestão de Balancetes', noticias: 'Gestão de Notícias' };
 
 var sidebarEl = document.getElementById('sidebar');
 var sidebarOverlay = document.getElementById('sidebar-overlay');

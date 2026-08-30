@@ -52,6 +52,9 @@
       <button type="button" class="sidebar-link is-active" data-tab="editais">
         <span class="sidebar-ico" aria-hidden="true">📄</span>Gestão de Editais
       </button>
+      <button type="button" class="sidebar-link" data-tab="balancetes">
+        <span class="sidebar-ico" aria-hidden="true">💰</span>Balancetes
+      </button>
       <button type="button" class="sidebar-link" data-tab="noticias">
         <span class="sidebar-ico" aria-hidden="true">📰</span>Gestão de Notícias
       </button>
@@ -153,6 +156,50 @@
           <div class="doc-manage-list" id="doc-manage-list"></div>
           <p id="doc-manage-vazio" style="display:none; font-size:13px; color:var(--tinta-suave); padding:14px 2px;">Nenhum documento nesta categoria ainda.</p>
           <p id="doc-manage-hint" style="font-size:13px; color:var(--tinta-suave); padding:14px 2px;">Selecione uma categoria acima para listar os documentos.</p>
+        </div>
+      </section>
+
+      <!-- ABA: GESTÃO DE BALANCETES -->
+      <section class="tab-panel" data-tab-panel="balancetes">
+        <div class="panel">
+          <h2>Upload de balancete</h2>
+          <p class="hint">Envie um novo balancete financeiro para publicação na página de Transparência.</p>
+
+          <form id="balancete-form">
+            <div class="form-field">
+              <label for="balancete-titulo">Título do balancete</label>
+              <input type="text" id="balancete-titulo" placeholder="Ex: Balancete — Julho/2026" required>
+            </div>
+
+            <div class="form-field">
+              <label for="balancete-referencia">Ano/mês de referência</label>
+              <input type="month" id="balancete-referencia" required>
+            </div>
+
+            <div class="form-field">
+              <label for="balancete-status">Status</label>
+              <select id="balancete-status" required></select>
+            </div>
+
+            <div class="form-field">
+              <label for="balancete-file">Anexar PDF</label>
+              <input type="file" id="balancete-file" accept="application/pdf" required>
+            </div>
+
+            <div id="balancete-file-preview"></div>
+
+            <div class="upload-actions">
+              <button type="submit" class="btn btn-primary">Fazer upload</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="panel">
+          <h2>Balancetes publicados</h2>
+          <p class="hint">Edite ou exclua balancetes já publicados no site.</p>
+
+          <div class="doc-manage-list" id="balancete-manage-list"></div>
+          <p id="balancete-manage-vazio" style="display:none; font-size:13px; color:var(--tinta-suave); padding:14px 2px;">Nenhum balancete publicado ainda.</p>
         </div>
       </section>
 
@@ -270,6 +317,43 @@
 
       <div class="modal-actions">
         <button type="button" id="btn-cancelar-edicao-noticia" class="btn btn-ghost">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Salvar alterações</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL DE EDIÇÃO: BALANCETE -->
+<div class="modal-overlay" id="modal-editar-balancete">
+  <div class="modal-card">
+    <h3>Editar balancete</h3>
+    <form id="form-editar-balancete">
+      <div class="form-field">
+        <label for="edit-balancete-titulo">Título do balancete</label>
+        <input type="text" id="edit-balancete-titulo" required>
+      </div>
+
+      <div class="form-field">
+        <label for="edit-balancete-referencia">Ano/mês de referência</label>
+        <input type="month" id="edit-balancete-referencia" required>
+      </div>
+
+      <div class="form-field">
+        <label for="edit-balancete-status">Status</label>
+        <select id="edit-balancete-status" required></select>
+      </div>
+
+      <div class="form-field">
+        <label>Arquivo PDF atual</label>
+        <div id="edit-balancete-arquivo-atual"></div>
+        <div class="form-field" id="edit-balancete-file-field" style="display:none;">
+          <label for="edit-balancete-file">Novo arquivo PDF</label>
+          <input type="file" id="edit-balancete-file" accept="application/pdf">
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" id="btn-cancelar-edicao-balancete" class="btn btn-ghost">Cancelar</button>
         <button type="submit" class="btn btn-primary">Salvar alterações</button>
       </div>
     </form>
