@@ -185,6 +185,9 @@ function renderizarDocumentos(categoriaSlug){
   });
 }
 
+// Só os cards com data-categoria abrem a lista dinâmica de PDFs. "Acordos de
+// cooperação", "RH — CLT" e "Licitações" são seções estáticas (data-goto): só
+// título e texto, sem download, sem card e sem consulta ao Firestore.
 document.querySelectorAll('.transp-item[data-categoria]').forEach(function(item){
   item.addEventListener('click', function(){
     var nomeEl = item.querySelector('b');

@@ -34,6 +34,17 @@
   .navlinks a:hover{ color:var(--papel); }
   .navlinks a.active{ color:var(--papel); font-weight:600; border-color:var(--ocre-400); }
 
+  /* Agrupa os links e o social à direita: o .nav segue com 2 filhos, então o
+     justify-content:space-between original permanece intacto. */
+  .nav-right{ display:flex; align-items:center; gap:24px; }
+
+  /* Ícone social (SVG inline, currentColor): herda a cor de texto do contexto
+     e realça no ocre no hover. 44x44 garante área de toque confortável. */
+  .social-link{ display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; color:var(--tinta-suave); cursor:pointer; transition:all 0.3s ease; }
+  .social-link:hover{ color:var(--ocre-400); }
+  .social-link:focus-visible{ outline:2px solid var(--ocre-400); outline-offset:2px; border-radius:8px; }
+  .social-link svg{ display:block; }
+
   section{ padding:56px 0; }
   .section-head{ display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:30px; gap:20px; flex-wrap:wrap;}
   .section-head h2{ font-size:26px; color:var(--papel); }
@@ -274,6 +285,9 @@
   footer h5{ font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:var(--ocre-400); margin-bottom:12px; }
   footer .flinks{ display:flex; flex-direction:column; gap:8px; font-size:13px; color:var(--tinta-suave); }
   footer .flinks a{ cursor:pointer; }
+  /* O box de toque tem 44px e o glifo 20px: o recuo de 12px alinha a borda
+     esquerda do ícone com o texto da coluna, sem reduzir a área de toque. */
+  footer .social-link{ margin:14px 0 0 -12px; }
   .foot-bottom{ font-size:12px; color:var(--tinta-suave); border-top:1px solid var(--linha); padding-top:18px; text-align:center; }
 
   /* ---- ARQUIVO DE NOTÍCIAS (noticias.html) ---- */
@@ -303,6 +317,11 @@
   .materia-estado.is-visible{ display:block; }
   .materia-estado h2{ font-size:26px; color:var(--papel); margin-bottom:14px; }
   .materia-estado p{ font-size:14px; color:var(--tinta-suave); margin-bottom:24px; }
+
+  /* ---- TEXTO INSTITUCIONAL (bloco estático de leitura, sem lista de PDFs) ---- */
+  .texto-institucional{ max-width:64ch; font-size:16px; line-height:1.9; color:var(--tinta-suave); }
+  .texto-institucional p{ margin-bottom:20px; }
+  .texto-institucional p:last-child{ margin-bottom:0; }
 
   .page{ display:none; }
   .page.is-active{ display:block; }

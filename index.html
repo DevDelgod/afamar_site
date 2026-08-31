@@ -17,14 +17,23 @@
 <header>
   <div class="nav">
     <div class="brand" data-goto="home"><img class="mark" src="assets/logo_afamar.avif" alt="AFAMAR">AFAMAR</div>
-    <nav class="navlinks">
-      <a data-goto="home">Início</a>
-      <a data-goto="sobre">Quem somos</a>
-      <a data-goto="projetos">Projetos</a>
-      <a data-goto="transparencia">Transparência</a>
-      <a href="noticias.html">Notícias</a>
-      <a data-goto="contato">Contato</a>
-    </nav>
+    <div class="nav-right">
+      <nav class="navlinks">
+        <a data-goto="home">Início</a>
+        <a data-goto="sobre">Quem somos</a>
+        <a data-goto="projetos">Projetos</a>
+        <a data-goto="transparencia">Transparência</a>
+        <a href="noticias.html">Notícias</a>
+        <a data-goto="contato">Contato</a>
+      </nav>
+      <a class="social-link" href="https://www.instagram.com/agricultura_marica_rj/" target="_blank" rel="noopener noreferrer" aria-label="Acessar Instagram da AFAMAR">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+        </svg>
+      </a>
+    </div>
   </div>
 </header>
 
@@ -92,7 +101,7 @@
   <div class="page" data-page="sobre">
     <section style="padding-top:44px;">
       <div class="eyebrow">Institucional</div>
-      <h2 style="font-size:30px; color:var(--verde-900); margin-bottom:30px;">Quem somos</h2>
+      <h2 style="font-size:30px; color:var(--papel); margin-bottom:30px;">Quem somos</h2>
       <div class="sobre-grid">
         <div>
           <p>Em 2017, pequenos produtores familiares do município de Marica se juntaram e deram início ao projeto do que seria posteriormente Associação de Agricultura Familiar de Maricá. Originalmente intitulada Associação de Agricultura de Maricá - Professor Luiz Carlos Viegas, teve como inspiração o professor maricaense notório pelas suas contribuições pela agricultura e desenvolvimento social e econômico do município, que também vem a ser pai do seu membro fundador, Allan Viegas. Com as dificuldades de adquirir infraestrutura e apoio, mais qualificação, poder de compra, plantar, colher e vender juntos, a Associação não tomou forma até dois anos depois, com a formalização e criação da Associação de Agricultura Familiar de Maricá.</p>
@@ -164,7 +173,7 @@
   <div class="page" data-page="projetos">
     <section style="padding-top:44px;">
       <div class="eyebrow">Institucional</div>
-      <h2 style="font-size:30px; color:var(--verde-900); margin-bottom:30px;">Projetos</h2>
+      <h2 style="font-size:30px; color:var(--papel); margin-bottom:30px;">Projetos</h2>
       <div class="projetos-grid" style="margin-bottom:0;">
         <div class="proj-card merenda">
           <span class="proj-tag">Alimentação escolar</span>
@@ -192,7 +201,7 @@
   <div class="page" data-page="transparencia">
     <section style="padding-top:44px;">
       <div class="eyebrow">Transparência</div>
-      <h2 style="font-size:30px; color:var(--verde-900); margin-bottom:10px;">Documentos institucionais</h2>
+      <h2 style="font-size:30px; color:var(--papel); margin-bottom:10px;">Documentos institucionais</h2>
       <p style="font-size:14px; color:var(--tinta-suave); max-width:56ch; margin-bottom:30px;">Espaço para divulgar informações sobre a gestão, prestação de contas e atividades realizadas, promovendo clareza e confiança junto aos associados e à sociedade.</p>
 
       <a class="editais-destaque" data-goto="editais">
@@ -210,15 +219,15 @@
         <div class="transp-item" data-categoria="calendario"><b>Calendário</b>Agenda institucional</div>
         <div class="transp-item" data-categoria="cnds"><b>CNDs</b>Certidões negativas de débito</div>
         <div class="transp-item" data-categoria="competencias-estatutarias"><b>Competências estatutárias</b>Atribuições da diretoria</div>
-        <div class="transp-item" data-categoria="acordos-cooperacao"><b>Acordos de cooperação</b>Parcerias formalizadas</div>
+        <div class="transp-item" data-goto="acordos-cooperacao"><b>Acordos de cooperação</b>Parcerias formalizadas</div>
         <div class="transp-item" data-categoria="organograma"><b>Organograma</b>Estrutura da diretoria</div>
         <div class="transp-item" data-categoria="editais-institucionais"><b>Editais institucionais</b>Seleções, resultados e chamamentos</div>
-        <div class="transp-item" data-categoria="licitacoes"><b>Licitações</b>Processos licitatórios</div>
+        <div class="transp-item" data-goto="licitacoes"><b>Licitações</b>Processos licitatórios</div>
         <div class="transp-item" data-categoria="conselho-fiscal"><b>Conselho fiscal</b>Composição e pareceres</div>
         <div class="transp-item" data-categoria="relatorio-gestao-anual"><b>Relatório de gestão anual</b>Prestação de contas</div>
-        <div class="transp-item" data-categoria="rh-valores-pagos"><b>RH — valores pagos (CLT)</b>Folha de pagamento dos projetos</div>
+        <div class="transp-item" data-goto="rh-clt"><b>RH — valores pagos (CLT)</b>Folha de pagamento dos projetos</div>
       </div>
-      <h3 style="font-size:17px; color:var(--verde-900); margin-bottom:14px;">Balancetes financeiros</h3>
+      <h3 style="font-size:17px; color:var(--papel); margin-bottom:14px;">Balancetes financeiros</h3>
       <div class="doclist" id="balancetes-doclist"></div>
       <p id="balancetes-vazio" style="display:none; font-size:13px; color:var(--tinta-suave); padding:14px 2px;">Nenhum balancete publicado ainda.</p>
     </section>
@@ -228,9 +237,45 @@
   <div class="page" data-page="lista-documentos">
     <section style="padding-top:44px;">
       <a class="proj-link" data-goto="transparencia" style="display:inline-block; margin-bottom:24px;">← Voltar para Transparência</a>
-      <h2 id="titulo-categoria-doc" style="font-size:30px; color:var(--verde-900); margin-bottom:30px;">Categoria</h2>
+      <h2 id="titulo-categoria-doc" style="font-size:30px; color:var(--papel); margin-bottom:30px;">Categoria</h2>
       <div class="doclist" id="lista-documentos-doclist"></div>
       <p id="lista-documentos-vazio" style="display:none; font-size:13px; color:var(--tinta-suave); padding:18px 2px;">Nenhum documento cadastrado nesta categoria ainda.</p>
+    </section>
+  </div>
+
+  <!-- ACORDOS DE COOPERAÇÃO (seção estática: só título e texto, sem PDFs) -->
+  <div class="page" data-page="acordos-cooperacao">
+    <section style="padding-top:44px;">
+      <a class="proj-link" data-goto="transparencia" style="display:inline-block; margin-bottom:24px;">← Voltar para Transparência</a>
+      <div class="eyebrow">Transparência</div>
+      <h2 style="font-size:30px; color:var(--papel); margin-bottom:22px;">Acordos de Cooperação</h2>
+      <div class="texto-institucional">
+        <p>Os Acordos de Cooperação Técnica visam promover parcerias estratégicas para o desenvolvimento de projetos conjuntos, com foco no intercâmbio de conhecimento, tecnologias e boas práticas. Esses acordos fortalecem a colaboração entre instituições, otimizando recursos e alcançando resultados sustentáveis e inovadores.</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- RECURSOS HUMANOS — CLT (seção estática: só título e texto, sem PDFs) -->
+  <div class="page" data-page="rh-clt">
+    <section style="padding-top:44px;">
+      <a class="proj-link" data-goto="transparencia" style="display:inline-block; margin-bottom:24px;">← Voltar para Transparência</a>
+      <div class="eyebrow">Transparência</div>
+      <h2 style="font-size:30px; color:var(--papel); margin-bottom:22px;">Recursos Humanos — CLT</h2>
+      <div class="texto-institucional">
+        <p>A Associação de Agricultura Familiar de Maricá, até o presente momento, não realizou contratação de RH no modelo CLT em nenhum de seus projetos.</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- LICITAÇÕES (seção estática: só título e texto, sem PDFs) -->
+  <div class="page" data-page="licitacoes">
+    <section style="padding-top:44px;">
+      <a class="proj-link" data-goto="transparencia" style="display:inline-block; margin-bottom:24px;">← Voltar para Transparência</a>
+      <div class="eyebrow">Transparência</div>
+      <h2 style="font-size:30px; color:var(--papel); margin-bottom:22px;">Licitações</h2>
+      <div class="texto-institucional">
+        <p>A Associação de Agricultura Familiar de Maricá utiliza os procedimentos de compras aprovados pela MROSC – Marco Regulatório das Organizações da Sociedade Civil (Lei 13.019/2014), se baseando nos critérios de mercado, no desenvolvimento de seus projetos.</p>
+      </div>
     </section>
   </div>
 
@@ -266,7 +311,7 @@
   <div class="page" data-page="contato">
     <section style="padding-top:44px;">
       <div class="eyebrow">Fale com a gente</div>
-      <h2 style="font-size:30px; color:var(--verde-900); margin-bottom:30px;">Contato</h2>
+      <h2 style="font-size:30px; color:var(--papel); margin-bottom:30px;">Contato</h2>
       <div class="contato-grid">
         <div>
           <div class="info-row"><b>Associação</b><span>Associação de Agricultura Familiar de Maricá</span></div>
@@ -323,6 +368,13 @@
       <div>
         <h5>AFAMAR</h5>
         <p style="font-size:13px; color:var(--tinta-suave); max-width:32ch;">Associação de Agricultura Familiar de Maricá. Av. Pref. Ivan Mundin, nº 996, Araçatiba — Maricá/RJ.</p>
+        <a class="social-link" href="https://www.instagram.com/agricultura_marica_rj/" target="_blank" rel="noopener noreferrer" aria-label="Acessar Instagram da AFAMAR">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+          </svg>
+        </a>
       </div>
       <div>
         <h5>Institucional</h5>
